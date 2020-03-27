@@ -18,12 +18,12 @@ func main() {
 
 	orderType := buyCmd.String("ordertype", "market", "order type")
 
-	if *orderType == "" {
-		flag.PrintDefaults()
-		os.Exit(1)
-	}
 	sharePrice := 100
-	_ = buyCmd.Parse(os.Args[2:])
+	if len(os.Args) > 1 {
+		_ = buyCmd.Parse(os.Args[2:])
 
-	fmt.Printf("purchased %d shares of %s, and total value is %d \n", *numShares, *ticker, *numShares*sharePrice)
+	}
+
+	fmt.Printf("purchased %d shares of %s with %s order, and total value is %d \n", *numShares, *ticker,
+		*orderType, *numShares*sharePrice)
 }
