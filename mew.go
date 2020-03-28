@@ -4,26 +4,31 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 )
 
-// example: ./mew buy --shares 100  --ticker AAPL
-// output: purchased 100 shares of AAPL, and total value is 10000
+// example input from CLI: mew buy -s 100 -t AAPL
+// output: purchased 100 shares of AAPL with market order, and total cost is 10000
 func main() {
 	// example of a simple market order buy
 	buyCmd := flag.NewFlagSet("buy", flag.ExitOnError)
-	//sellCmd := flag.NewFlagSet("sell", flag.ExitOnError)
 
-	ticker := buyCmd.String("ticker", "YANG", "stock ticker")
-	numShares := buyCmd.Int("shares", 0, "number of shares to purchase")
+	var ticker string
+	buyCmd.StringVar(&ticker, "t", "YANG", "stock ticker")
 
-	orderType := buyCmd.String("ordertype", "market", "order type")
+	var numShares int
+	buyCmd.IntVar(&numShares, "s", 0, "number of shares to purchase")
 
-	sharePrice := 100
+	var orderType string
+	buyCmd.StringVar(&orderType, "o", "market", "order type")
+
+	sharePrice := 100 // place holder
 	if len(os.Args) > 1 {
 		_ = buyCmd.Parse(os.Args[2:])
-
+		ticker = strings.ToUpper(ticker)
+		orderType = strings.ToLower(orderType)
 	}
 
-	fmt.Printf("purchased %d shares of %s with %s order, and total value is %d \n", *numShares, *ticker,
-		*orderType, *numShares*sharePrice)
+	fmt.Printf("purchased %d shares of %s with %s order, and total cost is %d \n", numShares, ticker,
+		orderType, numShares*sharePrice)
 }
