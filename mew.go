@@ -1,4 +1,4 @@
-package mew
+package main
 
 import (
 	"flag"
