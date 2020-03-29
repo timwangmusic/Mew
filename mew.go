@@ -1,15 +1,31 @@
-package main
+package mew
 
 import (
 	"flag"
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/andrewstuart/go-robinhood"
 )
 
 // example input from CLI: mew buy -s 100 -t AAPL
 // output: purchased 100 shares of AAPL with market order, and total cost is 10000
 func main() {
+
+	cli, err := robinhood.Dial(&robinhood.OAuth{
+		Username: "andrewstuart",
+		Password: "mypasswordissecure",
+	})
+
+	if err != nil {
+		//Oh well
+	}
+
+	iSPY, err := cli.GetInstrumentForSymbol("SPY")
+
+	fmt.Print(iSPY)
+
 	// example of a simple market order buy
 	buyCmd := flag.NewFlagSet("buy", flag.ExitOnError)
 
