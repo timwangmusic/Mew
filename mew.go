@@ -1,17 +1,18 @@
 package main
 
 import (
+	"astuart.co/go-robinhood"
 	"flag"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"strings"
-
-	"github.com/andrewstuart/go-robinhood"
 )
 
 // example input from CLI: mew buy -s 100 -t AAPL
 // output: purchased 100 shares of AAPL with market order, and total cost is 10000
 func main() {
+	log.Info("welcome to use the mew stock assistant")
 
 	cli, err := robinhood.Dial(&robinhood.OAuth{
 		Username: "andrewstuart",
