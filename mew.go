@@ -41,6 +41,10 @@ func main() {
 		orderType = strings.ToLower(orderType)
 	}
 
+	if !(robinhood.IsRegularTradingTime() || robinhood.IsExtendedTradingTime()) {
+		log.Info("out of regular trading or extended trading time, order will be fulfilled later")
+	}
+
 	buyErr := transactions.PlaceMarketOrder(cli, ticker, numShares, robinhood.Buy)
 	if buyErr != nil {
 		log.Error(buyErr)

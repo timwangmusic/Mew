@@ -43,7 +43,10 @@ func PlaceMarketOrder(client *robinhood.Client, securityName string, quantity ui
 	}
 
 	// place order
-	_, orderErr := client.Order(ins, robinhood.OrderOpts{Type: robinhood.Market,
+	// use ask price in quote to buy or sell
+	// time in force defaults to "good till canceled(gtc)"
+	_, orderErr := client.Order(ins, robinhood.OrderOpts{
+		Type:     robinhood.Market,
 		Quantity: quantity,
 		Side:     orderSide,
 		Price:    quotes[0].AskPrice,
