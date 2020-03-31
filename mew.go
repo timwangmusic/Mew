@@ -14,6 +14,11 @@ import (
 func main() {
 	log.Info("welcome to use the Mew stock assistant")
 
+	if len(os.Args) < 2 {
+		log.Info("no transaction type specified")
+		os.Exit(1)
+	}
+
 	cli, err := robinhood.Dial(&robinhood.OAuth{
 		Username: "andrewstuart",
 		Password: "mypasswordissecure",
@@ -21,6 +26,7 @@ func main() {
 
 	if err != nil {
 		log.Error(err)
+		os.Exit(1)
 	}
 
 	// example of a simple market order buy
