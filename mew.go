@@ -1,12 +1,15 @@
 package main
 
 import (
-	"astuart.co/go-robinhood"
 	"flag"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"strings"
+
+	"astuart.co/go-robinhood"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	"github.com/weihesdlegend/Mew/config"
 )
 
 // example input from CLI: mew buy -s 100 -t AAPL
@@ -14,9 +17,23 @@ import (
 func main() {
 	log.Info("welcome to use the mew stock assistant")
 
+	viper.SetConfigName("config") // name of config file (without extension)
+	viper.SetConfigType("yaml")   // REQUIRED if the config file does not have the extension in the name
+	viper.AddConfigPath(".")      // optionally look for config in the working directory
+
+	var cfg config.Configurations
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.Info("Config read error! %s", err)
+	}
+
+	if err := viper.Unmarshal(&cfg); err != nil {
+		log.Info("Unable to decode into struct, %v", err)
+	}
+
 	cli, err := robinhood.Dial(&robinhood.OAuth{
-		Username: "andrewstuart",
-		Password: "mypasswordissecure",
+		Username: cfg.Broker.User,
+		Password: cfg.Broker.Password,
 	})
 
 	if err != nil {
