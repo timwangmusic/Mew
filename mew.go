@@ -37,7 +37,7 @@ func main() {
 	})
 
 	if err != nil {
-		//Oh well
+		log.Error("Robinhood auth error %s", err)
 	}
 
 	iSPY, err := cli.GetInstrumentForSymbol("SPY")
