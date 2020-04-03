@@ -24,7 +24,8 @@ func main() {
 	var cfg config.Configurations
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Info("Config read error! %s", err)
+		log.Error("Config read error! %s", err)
+		return
 	}
 
 	if err := viper.Unmarshal(&cfg); err != nil {
