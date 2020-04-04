@@ -29,12 +29,11 @@ func main() {
 	var cfg config.Configurations
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Error("Config read error! %s", err)
-		return
+		log.Fatal("Config read error! %s", err)
 	}
 
 	if err := viper.Unmarshal(&cfg); err != nil {
-		log.Info("Unable to decode into struct, %v", err)
+		log.Fatal("Unable to decode into struct, %v", err)
 	}
 
 	cli, err := robinhood.Dial(&robinhood.OAuth{
@@ -43,8 +42,7 @@ func main() {
 	})
 
 	if err != nil {
-		log.Error("Robinhood auth error %s", err)
-    os.Exit(1)
+		log.Fatal("Robinhood auth error %s", err)
 	}
 
 	// example of a simple market order buy
