@@ -1,7 +1,13 @@
 package main
 
 import (
+	"encoding/base64"
+	"encoding/json"
+	"flag"
 	"os"
+
+	"github.com/weihesdlegend/Mew/transactions"
+	"golang.org/x/oauth2"
 
 	"astuart.co/go-robinhood"
 	log "github.com/sirupsen/logrus"
@@ -27,19 +33,50 @@ func main() {
 	}
 
 	if err := viper.Unmarshal(&cfg); err != nil {
-		log.Fatal("Unable to decode into struct, %v", err)
+		log.Error("Unable to decode into struct, %v", err)
+		return
 	}
 
-	rhClient, err := robinhood.Dial(&robinhood.OAuth{
-		Username: cfg.Broker.User,
-		Password: cfg.Broker.Password,
-	})
+	// TODO if cred is empty, please auth
+	/*
+		ts := &robinhood.OAuth{
+			Username: "username",
+			Password: "password",
+		}
+
+		tk, err := ts.Token()
+		// log.Info(tk)
+
+		tkJSON, err := json.Marshal(tk)
+		tkJSONb64 := base64.StdEncoding.EncodeToString(tkJSON)
+		log.Info(tkJSONb64) // here is your encoded credentials
+	*/
+
+	tkJSON, err := base64.StdEncoding.DecodeString(cfg.Broker.EncodedCredentials)
+	rawToken := oauth2.Token{}
+	json.Unmarshal(tkJSON, &rawToken)
+
+	cts := config.CachedTokenSource{
+		RawToken: rawToken,
+	}
+
+	cli, err := robinhood.Dial(&cts)
 
 	if err != nil {
-		log.Fatal("Robinhood auth error %s", err)
+		log.Error("Robinhood auth error %s", err)
+		os.Exit(1)
 	}
 
-	app := cli.NewApp()
+	iSPY, err := cli.GetInstrumentForSymbol("SPY")
+	log.Info(iSPY)
+
+	// example of a simple market order buy
+	buyCmd := flag.NewFlagSet("buy", flag.ExitOnError)
+	sellCmd := flag.NewFlagSet("sell", flag.ExitOnError)
+
+	var ticker string
+	buyCmd.StringVar(&ticker, "t", "YANG", "stock ticker")
+	sellCmd.StringVar(&ticker, "t", "YANG", "stock ticker")
 
 	commands.InitCommands(rhClient)
 	app.Commands = []*cli.Command{
