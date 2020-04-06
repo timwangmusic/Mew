@@ -1,5 +1,4 @@
 
 broker:
   name: robinhood
-  user: "aaaaa"
-  password: "bbbbb"
+  encodedCredentials: <PUT_YOUR_CRED_HERE>
