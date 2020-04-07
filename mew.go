@@ -1,20 +1,16 @@
 package main
 
 import (
+	"astuart.co/go-robinhood"
 	"encoding/base64"
 	"encoding/json"
-	"flag"
-	"os"
-
-	"github.com/weihesdlegend/Mew/transactions"
-	"golang.org/x/oauth2"
-
-	"astuart.co/go-robinhood"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 	"github.com/weihesdlegend/Mew/commands"
 	"github.com/weihesdlegend/Mew/config"
+	"golang.org/x/oauth2"
+	"os"
 )
 
 // example input from CLI: mew buy -s 100 -t AAPL
@@ -54,31 +50,23 @@ func main() {
 
 	tkJSON, err := base64.StdEncoding.DecodeString(cfg.Broker.EncodedCredentials)
 	rawToken := oauth2.Token{}
-	json.Unmarshal(tkJSON, &rawToken)
+	if err = json.Unmarshal(tkJSON, &rawToken); err != nil {
+		log.Fatal(err)
+	}
 
 	cts := config.CachedTokenSource{
 		RawToken: rawToken,
 	}
 
-	cli, err := robinhood.Dial(&cts)
+	rhClient, rhClientErr := robinhood.Dial(&cts)
 
-	if err != nil {
-		log.Error("Robinhood auth error %s", err)
-		os.Exit(1)
+	if rhClientErr != nil {
+		log.Fatal("Robinhood authentication error %s", rhClientErr)
 	}
 
-	iSPY, err := cli.GetInstrumentForSymbol("SPY")
-	log.Info(iSPY)
-
-	// example of a simple market order buy
-	buyCmd := flag.NewFlagSet("buy", flag.ExitOnError)
-	sellCmd := flag.NewFlagSet("sell", flag.ExitOnError)
-
-	var ticker string
-	buyCmd.StringVar(&ticker, "t", "YANG", "stock ticker")
-	sellCmd.StringVar(&ticker, "t", "YANG", "stock ticker")
-
 	commands.InitCommands(rhClient)
+
+	app := cli.NewApp()
 	app.Commands = []*cli.Command{
 		&commands.MarketBuyCmd,
 		&commands.MarketSellCmd,
