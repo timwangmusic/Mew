@@ -21,7 +21,7 @@ func InitCommands(rhClient *robinhood.Client) {
 	LimitBuyCmd = cli.Command{
 		Name:    "limit",
 		Aliases: []string{"lb"},
-		Usage:   "-t MSFT -s 10 -l 99.0",
+		Usage:   "-t MSFT -l 99.0 -v 2000",
 		Flags: []cli.Flag{
 			&tickerFlag,
 			&sharesFlag,
@@ -47,7 +47,7 @@ func InitCommands(rhClient *robinhood.Client) {
 	LimitSellCmd = cli.Command{
 		Name:    "limitsell",
 		Aliases: []string{"ls"},
-		Usage:   "-t MSFT -s 10 -l 101.0",
+		Usage:   "-t MSFT  -l 101.0 -v 2000",
 		Flags: []cli.Flag{
 			&tickerFlag,
 			&sharesFlag,
@@ -92,6 +92,7 @@ func InitCommands(rhClient *robinhood.Client) {
 
 	MarketSellCmd = cli.Command{
 		Name:  "sell",
+		Aliases: []string{"s"},
 		Usage: "-t MSFT -s 10",
 		Flags: []cli.Flag{
 			&tickerFlag,
