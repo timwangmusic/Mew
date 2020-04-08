@@ -5,13 +5,15 @@ import "github.com/urfave/cli/v2"
 // flag destination variables
 var ticker string
 var shares uint64
-var limit  float64
+var limit float64
+var limitSell float64
 var totalValue float64
 
 // supported flags
 var tickerFlag cli.StringFlag
 var sharesFlag cli.Uint64Flag
 var limitFlag cli.Float64Flag
+var limitSellFlag cli.Float64Flag
 var totalValueFlag cli.Float64Flag
 
 func initFlags() {
@@ -32,11 +34,19 @@ func initFlags() {
 	}
 
 	limitFlag = cli.Float64Flag{
-		Name:        "limit",
+		Name:        "limitforbuy",
 		Aliases:     []string{"l"},
 		Required:    false,
-		Value:       100.0,
+		Value:       99.0,
 		Destination: &limit,
+	}
+
+	limitSellFlag = cli.Float64Flag{
+		Name:        "limitforsell",
+		Aliases:     []string{"ls"},
+		Required:    false,
+		Value:       101.0,
+		Destination: &limitSell,
 	}
 
 	totalValueFlag = cli.Float64Flag{

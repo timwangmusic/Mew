@@ -19,9 +19,9 @@ func InitCommands(rhClient *robinhood.Client) {
 	initFlags()
 
 	LimitBuyCmd = cli.Command{
-		Name: "limit",
+		Name:    "limit",
 		Aliases: []string{"lb"},
-		Usage: "-t MSFT -s 10 -l 99.0",
+		Usage:   "-t MSFT -s 10 -l 99.0",
 		Flags: []cli.Flag{
 			&tickerFlag,
 			&sharesFlag,
@@ -30,7 +30,7 @@ func InitCommands(rhClient *robinhood.Client) {
 		},
 		Action: func(ctx *cli.Context) error {
 			if limit > 100.0 {
-				err := errors.New("limit in limit buy should not exceed 100%")
+				err := errors.New("the limit set in limit buy should not exceed 100%")
 				return err
 			}
 			ticker = strings.ToUpper(ticker)
@@ -39,6 +39,32 @@ func InitCommands(rhClient *robinhood.Client) {
 				log.Error(buyErr)
 			} else {
 				log.Infof("limit order placed for buying %s with a total value of %.2f", ticker, totalVal)
+			}
+			return nil
+		},
+	}
+
+	LimitSellCmd = cli.Command{
+		Name:    "limitsell",
+		Aliases: []string{"ls"},
+		Usage:   "-t MSFT -s 10 -l 101.0",
+		Flags: []cli.Flag{
+			&tickerFlag,
+			&sharesFlag,
+			&limitSellFlag,
+			&totalValueFlag,
+		},
+		Action: func(ctx *cli.Context) error {
+			if limitSell < 100.0 {
+				err := errors.New("the limit set in limit sell should be greater than 100%")
+				return err
+			}
+			ticker = strings.ToUpper(ticker)
+			sellErr, totalVal := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Sell, robinhood.Limit, totalValue, limitSell)
+			if sellErr != nil {
+				log.Error(sellErr)
+			} else {
+				log.Infof("limit order placed for selling %s with a total value of %.2f", ticker, totalVal)
 			}
 			return nil
 		},

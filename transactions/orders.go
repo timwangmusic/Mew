@@ -38,7 +38,7 @@ func PlaceOrder(client *robinhood.Client, security string, quantity uint64, orde
 	}
 
 	baselinePrice := quotes[0].AskPrice
-	totalVal = baselinePrice*float64(quantity)
+	totalVal = baselinePrice * float64(quantity)
 
 	orderOptions := robinhood.OrderOpts{
 		Type:     orderType,
@@ -69,6 +69,6 @@ func PlaceOrder(client *robinhood.Client, security string, quantity uint64, orde
 	return
 }
 
-func round(x, unit float64) float64{
+func round(x, unit float64) float64 {
 	return math.Round(x/unit) * unit
 }
