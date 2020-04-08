@@ -5,6 +5,7 @@ import (
 	"errors"
 	log "github.com/sirupsen/logrus"
 	"math"
+	"strings"
 )
 
 func getQuote(client *robinhood.Client, security string) (quotes []robinhood.Quote, err error) {
@@ -21,10 +22,12 @@ func getQuote(client *robinhood.Client, security string) (quotes []robinhood.Quo
 
 func PlaceOrder(client *robinhood.Client, security string, quantity uint64, orderSide robinhood.OrderSide,
 	orderType robinhood.OrderType, totalValue float64, limit float64) (err error, totalVal float64) {
-	if quantity == 0 && orderType == robinhood.Market {
+	if orderType == robinhood.Market && quantity == 0 {
+		err = errors.New("market order quantity can not be 0")
 		return
 	}
 
+	security = strings.ToUpper(security)
 	quotes, quoteErr := getQuote(client, security)
 	if quoteErr != nil {
 		err = quoteErr

@@ -10,11 +10,11 @@ var limitSell float64
 var totalValue float64
 
 // supported flags
-var tickerFlag cli.StringFlag
-var sharesFlag cli.Uint64Flag
-var limitFlag cli.Float64Flag
-var limitSellFlag cli.Float64Flag
-var totalValueFlag cli.Float64Flag
+var tickerFlag cli.StringFlag      // security name
+var sharesFlag cli.Uint64Flag      // number of shares to buy or sell
+var limitBuyFlag cli.Float64Flag   // limit buy percentage to market price
+var limitSellFlag cli.Float64Flag  // limit sell percentage to market price
+var totalValueFlag cli.Float64Flag // limit order maximum transaction amount
 
 func initFlags() {
 	tickerFlag = cli.StringFlag{
@@ -33,7 +33,7 @@ func initFlags() {
 		Destination: &shares,
 	}
 
-	limitFlag = cli.Float64Flag{
+	limitBuyFlag = cli.Float64Flag{
 		Name:        "limitforbuy",
 		Aliases:     []string{"l"},
 		Required:    false,
