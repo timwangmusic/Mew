@@ -70,6 +70,8 @@ func main() {
 	app.Commands = []*cli.Command{
 		&commands.MarketBuyCmd,
 		&commands.MarketSellCmd,
+		&commands.LimitBuyCmd,
+		&commands.LimitSellCmd,
 	}
 
 	appRunErr := app.Run(os.Args)

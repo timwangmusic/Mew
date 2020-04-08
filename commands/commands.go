@@ -2,33 +2,46 @@ package commands
 
 import (
 	"astuart.co/go-robinhood"
+	"errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/weihesdlegend/Mew/transactions"
 	"strings"
 )
 
-var ticker string
-var shares uint64
-
+// supported commands
 var MarketBuyCmd cli.Command
 var MarketSellCmd cli.Command
+var LimitBuyCmd cli.Command
+var LimitSellCmd cli.Command
 
 func InitCommands(rhClient *robinhood.Client) {
-	tickerFlag := cli.StringFlag{
-		Name:        "ticker",
-		Aliases:     []string{"t"},
-		Value:       "YANG",
-		Required:    false,
-		Destination: &ticker,
-	}
+	initFlags()
 
-	sharesFlag := cli.Uint64Flag{
-		Name:        "shares",
-		Aliases:     []string{"s"},
-		Value:       0,
-		Required:    false,
-		Destination: &shares,
+	LimitBuyCmd = cli.Command{
+		Name: "limit",
+		Aliases: []string{"lb"},
+		Usage: "-t MSFT -s 10 -l 99.0",
+		Flags: []cli.Flag{
+			&tickerFlag,
+			&sharesFlag,
+			&limitFlag,
+			&totalValueFlag,
+		},
+		Action: func(ctx *cli.Context) error {
+			if limit > 100.0 {
+				err := errors.New("limit in limit buy should not exceed 100%")
+				return err
+			}
+			ticker = strings.ToUpper(ticker)
+			buyErr, totalVal := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Buy, robinhood.Limit, totalValue, limit)
+			if buyErr != nil {
+				log.Error(buyErr)
+			} else {
+				log.Infof("limit order placed for buying %s with a total value of %.2f", ticker, totalVal)
+			}
+			return nil
+		},
 	}
 
 	MarketBuyCmd = cli.Command{
@@ -41,11 +54,11 @@ func InitCommands(rhClient *robinhood.Client) {
 		},
 		Action: func(ctx *cli.Context) error {
 			ticker = strings.ToUpper(ticker)
-			buyErr := transactions.PlaceMarketOrder(rhClient, ticker, shares, robinhood.Buy)
+			buyErr, _ := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Buy, robinhood.Market, 0, 100.0)
 			if buyErr != nil {
 				log.Error(buyErr)
 			} else {
-				log.Infof("purchased %d shares of %s with %s order", shares, ticker, "market")
+				log.Infof("purchased %d shares of %s with market order", shares, ticker)
 			}
 			return buyErr
 		},
@@ -60,11 +73,11 @@ func InitCommands(rhClient *robinhood.Client) {
 		},
 		Action: func(ctx *cli.Context) error {
 			ticker = strings.ToUpper(ticker)
-			sellErr := transactions.PlaceMarketOrder(rhClient, ticker, shares, robinhood.Sell)
+			sellErr, _ := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Sell, robinhood.Market, 0, 100.0)
 			if sellErr != nil {
 				log.Error(sellErr)
 			} else {
-				log.Infof("sold %d shares of %s with %s order", shares, ticker, "market")
+				log.Infof("sold %d shares of %s with market order", shares, ticker)
 			}
 			return sellErr
 		},
