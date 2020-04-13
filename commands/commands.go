@@ -14,8 +14,6 @@ var LimitBuyCmd cli.Command
 var LimitSellCmd cli.Command
 
 func InitCommands(rhClient *robinhood.Client) {
-	initFlags()
-
 	LimitBuyCmd = cli.Command{
 		Name:    "limitbuy",
 		Aliases: []string{"lb"},
