@@ -70,7 +70,7 @@ func main() {
 	app.Commands = []*cli.Command{
 		&commands.MarketBuyCmd,
 		&commands.MarketSellCmd,
-		&commands.LimitBuyCmd,
+		commands.LimitBuyCmd.GenCmd(),
 		&commands.LimitSellCmd,
 	}
 

@@ -10,31 +10,20 @@ import (
 // supported commands
 var MarketBuyCmd cli.Command
 var MarketSellCmd cli.Command
-var LimitBuyCmd cli.Command
+var LimitBuyCmd LimitBuyCommand
 var LimitSellCmd cli.Command
 
-func InitCommands(rhClient *robinhood.Client) {
-	LimitBuyCmd = cli.Command{
-		Name:    "limitbuy",
-		Aliases: []string{"lb"},
-		Usage:   "-t MSFT -l 99.0 -v 2000",
-		Flags: []cli.Flag{
-			&tickerFlag,
-			&sharesFlag,
-			&limitBuyFlag,
-			&totalValueFlag,
-		},
-		Action: func(ctx *cli.Context) error {
-			buyErr, totalVal := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Buy, robinhood.Limit, totalValue, limit)
-			if buyErr != nil {
-				log.Error(buyErr)
-				return buyErr
-			}
+type Preview struct {
+	Name string
+}
 
-			log.Infof("limit order placed for buying %s with a total value of %.2f", ticker, totalVal)
-			return nil
-		},
-	}
+type Command interface {
+	Preview() Preview
+	GenCmd() *cli.Command
+}
+
+func InitCommands(rhClient *robinhood.Client) {
+	LimitBuyCmd.Init(rhClient, ticker, limit, amount)
 
 	LimitSellCmd = cli.Command{
 		Name:    "limitsell",
@@ -44,10 +33,10 @@ func InitCommands(rhClient *robinhood.Client) {
 			&tickerFlag,
 			&sharesFlag,
 			&limitSellFlag,
-			&totalValueFlag,
+			&amountFlag,
 		},
 		Action: func(ctx *cli.Context) error {
-			sellErr, totalVal := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Sell, robinhood.Limit, totalValue, limitSell)
+			sellErr, totalVal := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Sell, robinhood.Limit, amount, limitSell)
 			if sellErr != nil {
 				log.Error(sellErr)
 				return sellErr
