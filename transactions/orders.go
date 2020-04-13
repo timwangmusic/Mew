@@ -40,7 +40,7 @@ func PlaceOrder(client *robinhood.Client, security string, quantity uint64, orde
 		return
 	}
 
-	baselinePrice := quotes[0].AskPrice
+	baselinePrice := quotes[0].Price()
 	totalVal = baselinePrice * float64(quantity)
 
 	orderOptions := robinhood.OrderOpts{
