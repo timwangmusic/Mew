@@ -16,7 +16,7 @@ var limitBuyFlag cli.Float64Flag   // limit buy percentage to market price
 var limitSellFlag cli.Float64Flag  // limit sell percentage to market price
 var totalValueFlag cli.Float64Flag // limit order maximum transaction amount
 
-func initFlags() {
+func init() {
 	tickerFlag = cli.StringFlag{
 		Name:        "ticker",
 		Aliases:     []string{"t"},
