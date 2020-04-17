@@ -1,0 +1,81 @@
+package commands
+
+import (
+	"errors"
+	"math"
+	"strings"
+
+	"astuart.co/go-robinhood"
+)
+
+// TODO comment
+type LimitBuyCommand struct {
+	rhClient     *robinhood.Client
+	Ticker       string
+	PercentLimit float64
+	AmountLimit  float64
+	//
+	Ins  robinhood.Instrument
+	Opts robinhood.OrderOpts
+}
+
+// Readonly
+func (limitBuy LimitBuyCommand) Validate() error {
+	// TODO Add validation logic here
+	return errors.New("")
+}
+
+// Write, update internal fields
+// TODO should it be stateless?
+func (limitBuy *LimitBuyCommand) Prepare() error {
+	// TODO
+	TICK := strings.ToUpper(ticker)
+	quotes, quoteErr := limitBuy.rhClient.GetQuote(TICK)
+	if quoteErr != nil {
+		return quoteErr
+	}
+
+	if len(quotes) == 0 {
+		return errors.New("no quote obtained from provided security name, please check")
+	}
+
+	ins, insErr := limitBuy.rhClient.GetInstrumentForSymbol(TICK)
+	if insErr != nil {
+		return insErr
+	}
+	limitBuy.Ins = *ins
+
+	baselinePrice := quotes[0].Price()
+	// totalVal := baselinePrice * float64(quantity)
+
+	limitPrice := round(baselinePrice*limitBuy.PercentLimit/100.0, 0.01) // limit to floating point 2 digits
+	quantity := uint64(totalValue / limitPrice)
+
+	// log.Debugf("limit price is %.2f, and number of quantity is %d", limitPrice, quantity)
+
+	limitBuy.Opts = robinhood.OrderOpts{
+		Type:     robinhood.Limit,
+		Quantity: quantity,
+		Side:     robinhood.Buy,
+		Price:    limitPrice,
+	}
+
+	return errors.New("")
+}
+
+func (limitBuy LimitBuyCommand) Execute() error {
+	// place order
+	// use ask price in quote to buy or sell
+	// time in force defaults to "good till canceled(gtc)"
+	_, orderErr := limitBuy.rhClient.Order(&limitBuy.Ins, limitBuy.Opts)
+
+	if orderErr != nil {
+		return orderErr
+	}
+
+	return errors.New("")
+}
+
+func round(x, unit float64) float64 {
+	return math.Round(x/unit) * unit
+}

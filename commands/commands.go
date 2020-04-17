@@ -25,14 +25,33 @@ func InitCommands(rhClient *robinhood.Client) {
 			&totalValueFlag,
 		},
 		Action: func(ctx *cli.Context) error {
-			buyErr, totalVal := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Buy, robinhood.Limit, totalValue, limit)
+
+			// init
+			lbCmd := LimitBuyCommand{
+				rhClient:     rhClient,
+				Ticker:       ticker,
+				PercentLimit: limit,
+				AmountLimit:  totalValue,
+			}
+			// TODO show preview here
+			lbCmd.Prepare()
+			// Exec
+			buyErr := lbCmd.Execute()
 			if buyErr != nil {
 				log.Error(buyErr)
 				return buyErr
 			}
 
-			log.Infof("limit order placed for buying %s with a total value of %.2f", ticker, totalVal)
-			return nil
+			/*
+				buyErr, totalVal := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Buy, robinhood.Limit, totalValue, limit)
+				if buyErr != nil {
+					log.Error(buyErr)
+					return buyErr
+				}
+
+				log.Infof("limit order placed for buying %s with a total value of %.2f", ticker, totalVal)
+				return nil
+			*/
 		},
 	}
 
@@ -67,6 +86,7 @@ func InitCommands(rhClient *robinhood.Client) {
 			&sharesFlag,
 		},
 		Action: func(ctx *cli.Context) error {
+
 			buyErr, _ := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Buy, robinhood.Market, 0, 100.0)
 			if buyErr != nil {
 				log.Error(buyErr)
