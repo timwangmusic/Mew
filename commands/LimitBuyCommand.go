@@ -30,7 +30,7 @@ func (limitBuy LimitBuyCommand) Validate() error {
 func (limitBuy *LimitBuyCommand) Prepare() error {
 
 	validateErr := limitBuy.Validate()
-	if validateErr == nil {
+	if validateErr != nil {
 		return validateErr
 	}
 
