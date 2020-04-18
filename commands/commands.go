@@ -131,15 +131,6 @@ func InitCommands(rhClient *robinhood.Client) {
 			}
 
 			return nil
-			/*
-				sellErr, _ := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Sell, robinhood.Market, 0, 100.0)
-				if sellErr != nil {
-					log.Error(sellErr)
-				} else {
-					log.Infof("sold %d shares of %s with market order", shares, ticker)
-				}
-				return sellErr
-			*/
 		},
 	}
 }
