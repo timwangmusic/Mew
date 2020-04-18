@@ -1,16 +1,17 @@
 package main
 
 import (
-	"astuart.co/go-robinhood"
 	"encoding/base64"
 	"encoding/json"
+	"os"
+
+	"astuart.co/go-robinhood"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 	"github.com/weihesdlegend/Mew/commands"
 	"github.com/weihesdlegend/Mew/config"
 	"golang.org/x/oauth2"
-	"os"
 )
 
 // example input from CLI: mew buy -s 100 -t AAPL
@@ -34,20 +35,21 @@ func main() {
 	}
 
 	// TODO if cred is empty, please auth
+
 	/*
 		ts := &robinhood.OAuth{
-			Username: "username",
-			Password: "password",
+			Username: "user",
+			Password: "pwd",
 		}
 
 		tk, err := ts.Token()
-		// log.Info(tk)
 
 		tkJSON, err := json.Marshal(tk)
 		tkJSONb64 := base64.StdEncoding.EncodeToString(tkJSON)
 		log.Info(tkJSONb64) // here is your encoded credentials
 	*/
 
+	// tkJSON, err := base64.StdEncoding.DecodeString(cfg.Broker.EncodedCredentials)
 	tkJSON, err := base64.StdEncoding.DecodeString(cfg.Broker.EncodedCredentials)
 	rawToken := oauth2.Token{}
 	if err = json.Unmarshal(tkJSON, &rawToken); err != nil {
