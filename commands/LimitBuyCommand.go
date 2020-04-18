@@ -22,15 +22,20 @@ type LimitBuyCommand struct {
 // Readonly
 func (limitBuy LimitBuyCommand) Validate() error {
 	// TODO Add validation logic here
-	return errors.New("")
+	return nil
 }
 
 // Write, update internal fields
 // TODO should it be stateless?
 func (limitBuy *LimitBuyCommand) Prepare() error {
-	// TODO
+
+	validateErr := limitBuy.Validate()
+	if validateErr == nil {
+		return validateErr
+	}
+
 	TICK := strings.ToUpper(ticker)
-	quotes, quoteErr := limitBuy.rhClient.GetQuote(TICK)
+	quotes, quoteErr := limitBuy.rhClient.GetQuote(TICK) // TODO make rhClient as interface for testing
 	if quoteErr != nil {
 		return quoteErr
 	}
@@ -46,12 +51,8 @@ func (limitBuy *LimitBuyCommand) Prepare() error {
 	limitBuy.Ins = *ins
 
 	baselinePrice := quotes[0].Price()
-	// totalVal := baselinePrice * float64(quantity)
-
 	limitPrice := round(baselinePrice*limitBuy.PercentLimit/100.0, 0.01) // limit to floating point 2 digits
 	quantity := uint64(totalValue / limitPrice)
-
-	// log.Debugf("limit price is %.2f, and number of quantity is %d", limitPrice, quantity)
 
 	limitBuy.Opts = robinhood.OrderOpts{
 		Type:     robinhood.Limit,
@@ -60,10 +61,13 @@ func (limitBuy *LimitBuyCommand) Prepare() error {
 		Price:    limitPrice,
 	}
 
-	return errors.New("")
+	return nil
 }
 
 func (limitBuy LimitBuyCommand) Execute() error {
+	if limitBuy.Opts == (robinhood.OrderOpts{}) {
+		return errors.New("Please call Prepare()")
+	}
 	// place order
 	// use ask price in quote to buy or sell
 	// time in force defaults to "good till canceled(gtc)"
@@ -73,9 +77,10 @@ func (limitBuy LimitBuyCommand) Execute() error {
 		return orderErr
 	}
 
-	return errors.New("")
+	return nil
 }
 
+// TODO move this into util function
 func round(x, unit float64) float64 {
 	return math.Round(x/unit) * unit
 }
