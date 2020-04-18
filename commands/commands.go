@@ -80,20 +80,29 @@ func InitCommands(rhClient *robinhood.Client) {
 	MarketBuyCmd = cli.Command{
 		Name:    "buy",
 		Aliases: []string{"b"},
-		Usage:   "-t MSFT -s 10",
+		Usage:   "-t MSFT -v 200",
 		Flags: []cli.Flag{
 			&tickerFlag,
-			&sharesFlag,
+			// TODO &sharesFlag,
+			&totalValueFlag,
 		},
 		Action: func(ctx *cli.Context) error {
-
-			buyErr, _ := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Buy, robinhood.Market, 0, 100.0)
+			// init
+			mbCmd := &MarketBuyCommand{
+				rhClient:    rhClient,
+				Ticker:      ticker,
+				AmountLimit: totalValue,
+			}
+			// TODO show preview here
+			mbCmd.Prepare()
+			// Exec
+			buyErr := mbCmd.Execute()
 			if buyErr != nil {
 				log.Error(buyErr)
-			} else {
-				log.Infof("purchased %d shares of %s with market order", shares, ticker)
+				return buyErr
 			}
-			return buyErr
+
+			return nil
 		},
 	}
 
