@@ -5,7 +5,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/weihesdlegend/Mew/clients"
-	"github.com/weihesdlegend/Mew/transactions"
 )
 
 // supported commands
@@ -110,19 +109,38 @@ func InitCommands(rhClient *robinhood.Client) {
 	MarketSellCmd = cli.Command{
 		Name:    "sell",
 		Aliases: []string{"s"},
-		Usage:   "-t MSFT -s 10",
+		Usage:   "-t QQQ -v 250",
 		Flags: []cli.Flag{
 			&tickerFlag,
-			&sharesFlag,
+			// TODO &sharesFlag,
+			&totalValueFlag,
 		},
 		Action: func(ctx *cli.Context) error {
-			sellErr, _ := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Sell, robinhood.Market, 0, 100.0)
-			if sellErr != nil {
-				log.Error(sellErr)
-			} else {
-				log.Infof("sold %d shares of %s with market order", shares, ticker)
+			// init
+			msCmd := &MarketSellCommand{
+				rhClient:    rhClient,
+				Ticker:      ticker,
+				AmountLimit: totalValue,
 			}
-			return sellErr
+			// TODO show preview here
+			msCmd.Prepare()
+			// Exec
+			err := msCmd.Execute()
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+
+			return nil
+			/*
+				sellErr, _ := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Sell, robinhood.Market, 0, 100.0)
+				if sellErr != nil {
+					log.Error(sellErr)
+				} else {
+					log.Infof("sold %d shares of %s with market order", shares, ticker)
+				}
+				return sellErr
+			*/
 		},
 	}
 }
