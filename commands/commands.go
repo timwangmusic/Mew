@@ -26,8 +26,7 @@ func InitCommands(rhClient *robinhood.Client) {
 		},
 		Action: func(ctx *cli.Context) error {
 			// init
-			var lbCmd CommandBase
-			lbCmd = &LimitBuyCommand{
+			lbCmd := &LimitBuyCommand{
 				rhClient:     rhClient,
 				Ticker:       ticker,
 				PercentLimit: limit,
@@ -46,10 +45,11 @@ func InitCommands(rhClient *robinhood.Client) {
 		},
 	}
 
+	// TODO -ls needs to be updated
 	LimitSellCmd = cli.Command{
 		Name:    "limitsell",
 		Aliases: []string{"ls"},
-		Usage:   "-t MSFT  -l 101.0 -v 2000",
+		Usage:   "-t MSFT -ls 101.0 -v 2000",
 		Flags: []cli.Flag{
 			&tickerFlag,
 			&sharesFlag,
@@ -57,13 +57,22 @@ func InitCommands(rhClient *robinhood.Client) {
 			&totalValueFlag,
 		},
 		Action: func(ctx *cli.Context) error {
-			sellErr, totalVal := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Sell, robinhood.Limit, totalValue, limitSell)
+			// init
+			lsCmd := &LimitSellCommand{
+				rhClient:     rhClient,
+				Ticker:       ticker,
+				PercentLimit: limitSell,
+				AmountLimit:  totalValue,
+			}
+			// TODO show preview here
+			lsCmd.Prepare()
+			// Exec
+			sellErr := lsCmd.Execute()
 			if sellErr != nil {
 				log.Error(sellErr)
 				return sellErr
 			}
 
-			log.Infof("limit order placed for selling %s with a total value of %.2f", ticker, totalVal)
 			return nil
 		},
 	}
