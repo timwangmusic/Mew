@@ -2,7 +2,6 @@ package commands
 
 import (
 	"errors"
-	"math"
 	"strings"
 
 	"astuart.co/go-robinhood"
@@ -51,7 +50,7 @@ func (limitBuy *LimitBuyCommand) Prepare() error {
 	limitBuy.Ins = *ins
 
 	baselinePrice := quotes[0].Price()
-	limitPrice := round(baselinePrice*limitBuy.PercentLimit/100.0, 0.01) // limit to floating point 2 digits
+	limitPrice := Util{}.round(baselinePrice*limitBuy.PercentLimit/100.0, 0.01) // limit to floating point 2 digits
 	quantity := uint64(totalValue / limitPrice)
 
 	limitBuy.Opts = robinhood.OrderOpts{
@@ -78,9 +77,4 @@ func (limitBuy LimitBuyCommand) Execute() error {
 	}
 
 	return nil
-}
-
-// TODO move this into util function
-func round(x, unit float64) float64 {
-	return math.Round(x/unit) * unit
 }
