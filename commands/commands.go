@@ -4,6 +4,7 @@ import (
 	"astuart.co/go-robinhood"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/weihesdlegend/Mew/clients"
 	"github.com/weihesdlegend/Mew/transactions"
 )
 
@@ -28,7 +29,7 @@ func InitCommands(rhClient *robinhood.Client) {
 			// init
 			var lbCmd CommandBase
 			lbCmd = &LimitBuyCommand{
-				rhClient:     rhClient,
+				RhClient:     &clients.RHClient{Client: rhClient},
 				Ticker:       ticker,
 				PercentLimit: limit,
 				AmountLimit:  totalValue,
