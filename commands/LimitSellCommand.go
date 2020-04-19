@@ -35,7 +35,7 @@ func (base *LimitSellCommand) Prepare() error {
 	}
 
 	TICK := strings.ToUpper(ticker)
-	quotes, quoteErr := base.rhClient.GetQuote(TICK) // TODO make rhClient as interface for testing
+	quotes, quoteErr := base.RhClient.GetQuote(TICK) // TODO make rhClient as interface for testing
 	if quoteErr != nil {
 		return quoteErr
 	}
@@ -44,7 +44,7 @@ func (base *LimitSellCommand) Prepare() error {
 		return errors.New("no quote obtained from provided security name, please check")
 	}
 
-	ins, insErr := base.rhClient.GetInstrumentForSymbol(TICK)
+	ins, insErr := base.RhClient.GetInstrument(TICK)
 	if insErr != nil {
 		return insErr
 	}
@@ -71,7 +71,7 @@ func (base LimitSellCommand) Execute() error {
 	// place order
 	// use ask price in quote to buy or sell
 	// time in force defaults to "good till canceled(gtc)"
-	_, orderErr := base.rhClient.Order(&base.Ins, base.Opts)
+	_, orderErr := base.RhClient.MakeOrder(&base.Ins, base.Opts)
 
 	if orderErr != nil {
 		return orderErr

@@ -89,7 +89,7 @@ func InitCommands(rhClient *robinhood.Client) {
 		Action: func(ctx *cli.Context) error {
 			// init
 			mbCmd := &MarketBuyCommand{
-				rhClient:    rhClient,
+				RhClient:    &clients.RHClient{Client: rhClient},
 				Ticker:      ticker,
 				AmountLimit: totalValue,
 			}
@@ -118,7 +118,7 @@ func InitCommands(rhClient *robinhood.Client) {
 		Action: func(ctx *cli.Context) error {
 			// init
 			msCmd := &MarketSellCommand{
-				rhClient:    rhClient,
+				RhClient:    &clients.RHClient{Client: rhClient},
 				Ticker:      ticker,
 				AmountLimit: totalValue,
 			}

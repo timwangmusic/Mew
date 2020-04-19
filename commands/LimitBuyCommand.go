@@ -21,22 +21,22 @@ type LimitBuyCommand struct {
 }
 
 // Readonly
-func (limitBuy LimitBuyCommand) Validate() error {
+func (base LimitBuyCommand) Validate() error {
 	// TODO Add validation logic here
 	return nil
 }
 
 // Write, update internal fields
 // TODO should it be stateless?
-func (limitBuy *LimitBuyCommand) Prepare() error {
+func (base *LimitBuyCommand) Prepare() error {
 
-	validateErr := limitBuy.Validate()
+	validateErr := base.Validate()
 	if validateErr != nil {
 		return validateErr
 	}
 
 	TICK := strings.ToUpper(ticker)
-	quotes, quoteErr := limitBuy.RhClient.GetQuote(TICK) // TODO make rhClient as interface for testing
+	quotes, quoteErr := base.RhClient.GetQuote(TICK) // TODO make rhClient as interface for testing
 	if quoteErr != nil {
 		return quoteErr
 	}
@@ -45,17 +45,17 @@ func (limitBuy *LimitBuyCommand) Prepare() error {
 		return errors.New("no quote obtained from provided security name, please check")
 	}
 
-	ins, insErr := limitBuy.RhClient.GetInstrument(TICK)
+	ins, insErr := base.RhClient.GetInstrument(TICK)
 	if insErr != nil {
 		return insErr
 	}
-	limitBuy.Ins = *ins
+	base.Ins = *ins
 
 	baselinePrice := quotes[0].Price()
-	limitPrice := round(baselinePrice*limitBuy.PercentLimit/100.0, 0.01) // limit to floating point 2 digits
+	limitPrice := round(baselinePrice*base.PercentLimit/100.0, 0.01) // limit to floating point 2 digits
 	quantity := uint64(totalValue / limitPrice)
 
-	limitBuy.Opts = robinhood.OrderOpts{
+	base.Opts = robinhood.OrderOpts{
 		Type:     robinhood.Limit,
 		Quantity: quantity,
 		Side:     robinhood.Buy,
@@ -65,14 +65,14 @@ func (limitBuy *LimitBuyCommand) Prepare() error {
 	return nil
 }
 
-func (limitBuy LimitBuyCommand) Execute() error {
-	if limitBuy.Opts == (robinhood.OrderOpts{}) {
+func (base LimitBuyCommand) Execute() error {
+	if base.Opts == (robinhood.OrderOpts{}) {
 		return errors.New("Please call Prepare()")
 	}
 	// place order
 	// use ask price in quote to buy or sell
 	// time in force defaults to "good till canceled(gtc)"
-	_, orderErr := limitBuy.RhClient.MakeOrder(&limitBuy.Ins, limitBuy.Opts)
+	_, orderErr := base.RhClient.MakeOrder(&base.Ins, base.Opts)
 
 	if orderErr != nil {
 		return orderErr
