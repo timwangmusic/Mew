@@ -52,7 +52,7 @@ func (base *LimitSellCommand) Prepare() error {
 
 	baselinePrice := quotes[0].Price()
 	limitPrice := round(baselinePrice*base.PercentLimit/100.0, 0.01) // limit to floating point 2 digits
-	quantity := uint64(totalValue / limitPrice)
+	quantity := uint64(base.AmountLimit / limitPrice)
 
 	base.Opts = robinhood.OrderOpts{
 		Type:     robinhood.Limit,

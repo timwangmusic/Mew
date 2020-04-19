@@ -32,13 +32,21 @@ func InitCommands(rhClient *robinhood.Client) {
 				PercentLimit: limit,
 				AmountLimit:  totalValue,
 			}
-			// TODO show preview here
-			lbCmd.Prepare()
+
+			// Preview
+			err := lbCmd.Prepare()
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+
+			log.Info(OrderToString(lbCmd.Opts, lbCmd.Ins))
+
 			// Exec
-			buyErr := lbCmd.Execute()
-			if buyErr != nil {
-				log.Error(buyErr)
-				return buyErr
+			err = lbCmd.Execute()
+			if err != nil {
+				log.Error(err)
+				return err
 			}
 
 			return nil
@@ -64,13 +72,20 @@ func InitCommands(rhClient *robinhood.Client) {
 				PercentLimit: limitSell,
 				AmountLimit:  totalValue,
 			}
-			// TODO show preview here
-			lsCmd.Prepare()
+
+			// Preview
+			err := lsCmd.Prepare()
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+
+			log.Info(OrderToString(lsCmd.Opts, lsCmd.Ins))
 			// Exec
-			sellErr := lsCmd.Execute()
-			if sellErr != nil {
-				log.Error(sellErr)
-				return sellErr
+			err = lsCmd.Execute()
+			if err != nil {
+				log.Error(err)
+				return err
 			}
 
 			return nil
@@ -93,13 +108,20 @@ func InitCommands(rhClient *robinhood.Client) {
 				Ticker:      ticker,
 				AmountLimit: totalValue,
 			}
-			// TODO show preview here
-			mbCmd.Prepare()
+
+			// Preview
+			err := mbCmd.Prepare()
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+			log.Info(OrderToString(mbCmd.Opts, mbCmd.Ins))
+
 			// Exec
-			buyErr := mbCmd.Execute()
-			if buyErr != nil {
-				log.Error(buyErr)
-				return buyErr
+			err = mbCmd.Execute()
+			if err != nil {
+				log.Error(err)
+				return err
 			}
 
 			return nil
@@ -122,10 +144,17 @@ func InitCommands(rhClient *robinhood.Client) {
 				Ticker:      ticker,
 				AmountLimit: totalValue,
 			}
-			// TODO show preview here
-			msCmd.Prepare()
+
+			// Preview
+			err := msCmd.Prepare()
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+			log.Info(OrderToString(msCmd.Opts, msCmd.Ins))
+
 			// Exec
-			err := msCmd.Execute()
+			err = msCmd.Execute()
 			if err != nil {
 				log.Error(err)
 				return err

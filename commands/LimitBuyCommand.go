@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/weihesdlegend/Mew/clients"
 
 	"astuart.co/go-robinhood"
@@ -53,7 +54,7 @@ func (base *LimitBuyCommand) Prepare() error {
 
 	baselinePrice := quotes[0].Price()
 	limitPrice := round(baselinePrice*base.PercentLimit/100.0, 0.01) // limit to floating point 2 digits
-	quantity := uint64(totalValue / limitPrice)
+	quantity := uint64(base.AmountLimit / limitPrice)
 
 	base.Opts = robinhood.OrderOpts{
 		Type:     robinhood.Limit,
@@ -72,7 +73,8 @@ func (base LimitBuyCommand) Execute() error {
 	// place order
 	// use ask price in quote to buy or sell
 	// time in force defaults to "good till canceled(gtc)"
-	_, orderErr := base.RhClient.MakeOrder(&base.Ins, base.Opts)
+	orderRes, orderErr := base.RhClient.MakeOrder(&base.Ins, base.Opts)
+	log.Info("Order ", orderRes.ID, " placed")
 
 	if orderErr != nil {
 		return orderErr
