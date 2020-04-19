@@ -2,6 +2,7 @@ package commands
 
 import (
 	"errors"
+	"github.com/weihesdlegend/Mew/clients"
 	"math"
 	"strings"
 
@@ -10,7 +11,7 @@ import (
 
 // TODO comment
 type LimitBuyCommand struct {
-	rhClient     *robinhood.Client
+	RhClient     clients.Client
 	Ticker       string
 	PercentLimit float64
 	AmountLimit  float64
@@ -35,7 +36,7 @@ func (limitBuy *LimitBuyCommand) Prepare() error {
 	}
 
 	TICK := strings.ToUpper(ticker)
-	quotes, quoteErr := limitBuy.rhClient.GetQuote(TICK) // TODO make rhClient as interface for testing
+	quotes, quoteErr := limitBuy.RhClient.GetQuote(TICK) // TODO make rhClient as interface for testing
 	if quoteErr != nil {
 		return quoteErr
 	}
@@ -44,7 +45,7 @@ func (limitBuy *LimitBuyCommand) Prepare() error {
 		return errors.New("no quote obtained from provided security name, please check")
 	}
 
-	ins, insErr := limitBuy.rhClient.GetInstrumentForSymbol(TICK)
+	ins, insErr := limitBuy.RhClient.GetInstrument(TICK)
 	if insErr != nil {
 		return insErr
 	}
@@ -71,7 +72,7 @@ func (limitBuy LimitBuyCommand) Execute() error {
 	// place order
 	// use ask price in quote to buy or sell
 	// time in force defaults to "good till canceled(gtc)"
-	_, orderErr := limitBuy.rhClient.Order(&limitBuy.Ins, limitBuy.Opts)
+	_, orderErr := limitBuy.RhClient.MakeOrder(&limitBuy.Ins, limitBuy.Opts)
 
 	if orderErr != nil {
 		return orderErr
