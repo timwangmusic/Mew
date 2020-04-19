@@ -5,7 +5,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/weihesdlegend/Mew/clients"
-	"github.com/weihesdlegend/Mew/transactions"
 )
 
 // supported commands
@@ -27,8 +26,7 @@ func InitCommands(rhClient *robinhood.Client) {
 		},
 		Action: func(ctx *cli.Context) error {
 			// init
-			var lbCmd CommandBase
-			lbCmd = &LimitBuyCommand{
+			lbCmd := &LimitBuyCommand{
 				RhClient:     &clients.RHClient{Client: rhClient},
 				Ticker:       ticker,
 				PercentLimit: limit,
@@ -47,10 +45,11 @@ func InitCommands(rhClient *robinhood.Client) {
 		},
 	}
 
+	// TODO -ls needs to be updated
 	LimitSellCmd = cli.Command{
 		Name:    "limitsell",
 		Aliases: []string{"ls"},
-		Usage:   "-t MSFT  -l 101.0 -v 2000",
+		Usage:   "-t MSFT -ls 101.0 -v 2000",
 		Flags: []cli.Flag{
 			&tickerFlag,
 			&sharesFlag,
@@ -58,13 +57,22 @@ func InitCommands(rhClient *robinhood.Client) {
 			&totalValueFlag,
 		},
 		Action: func(ctx *cli.Context) error {
-			sellErr, totalVal := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Sell, robinhood.Limit, totalValue, limitSell)
+			// init
+			lsCmd := &LimitSellCommand{
+				RhClient:     &clients.RHClient{Client: rhClient},
+				Ticker:       ticker,
+				PercentLimit: limitSell,
+				AmountLimit:  totalValue,
+			}
+			// TODO show preview here
+			lsCmd.Prepare()
+			// Exec
+			sellErr := lsCmd.Execute()
 			if sellErr != nil {
 				log.Error(sellErr)
 				return sellErr
 			}
 
-			log.Infof("limit order placed for selling %s with a total value of %.2f", ticker, totalVal)
 			return nil
 		},
 	}
@@ -72,39 +80,58 @@ func InitCommands(rhClient *robinhood.Client) {
 	MarketBuyCmd = cli.Command{
 		Name:    "buy",
 		Aliases: []string{"b"},
-		Usage:   "-t MSFT -s 10",
+		Usage:   "-t MSFT -v 200",
 		Flags: []cli.Flag{
 			&tickerFlag,
-			&sharesFlag,
+			// TODO &sharesFlag,
+			&totalValueFlag,
 		},
 		Action: func(ctx *cli.Context) error {
-
-			buyErr, _ := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Buy, robinhood.Market, 0, 100.0)
+			// init
+			mbCmd := &MarketBuyCommand{
+				RhClient:    &clients.RHClient{Client: rhClient},
+				Ticker:      ticker,
+				AmountLimit: totalValue,
+			}
+			// TODO show preview here
+			mbCmd.Prepare()
+			// Exec
+			buyErr := mbCmd.Execute()
 			if buyErr != nil {
 				log.Error(buyErr)
-			} else {
-				log.Infof("purchased %d shares of %s with market order", shares, ticker)
+				return buyErr
 			}
-			return buyErr
+
+			return nil
 		},
 	}
 
 	MarketSellCmd = cli.Command{
 		Name:    "sell",
 		Aliases: []string{"s"},
-		Usage:   "-t MSFT -s 10",
+		Usage:   "-t QQQ -v 250",
 		Flags: []cli.Flag{
 			&tickerFlag,
-			&sharesFlag,
+			// TODO &sharesFlag,
+			&totalValueFlag,
 		},
 		Action: func(ctx *cli.Context) error {
-			sellErr, _ := transactions.PlaceOrder(rhClient, ticker, shares, robinhood.Sell, robinhood.Market, 0, 100.0)
-			if sellErr != nil {
-				log.Error(sellErr)
-			} else {
-				log.Infof("sold %d shares of %s with market order", shares, ticker)
+			// init
+			msCmd := &MarketSellCommand{
+				RhClient:    &clients.RHClient{Client: rhClient},
+				Ticker:      ticker,
+				AmountLimit: totalValue,
 			}
-			return sellErr
+			// TODO show preview here
+			msCmd.Prepare()
+			// Exec
+			err := msCmd.Execute()
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+
+			return nil
 		},
 	}
 }

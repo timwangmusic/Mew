@@ -4,31 +4,29 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/weihesdlegend/Mew/clients"
-
 	"astuart.co/go-robinhood"
+	"github.com/weihesdlegend/Mew/clients"
 )
 
 // TODO comment
-type LimitBuyCommand struct {
-	RhClient     clients.Client
-	Ticker       string
-	PercentLimit float64
-	AmountLimit  float64
+type MarketBuyCommand struct {
+	RhClient    clients.Client
+	Ticker      string
+	AmountLimit float64
 	//
 	Ins  robinhood.Instrument
 	Opts robinhood.OrderOpts
 }
 
 // Readonly
-func (base LimitBuyCommand) Validate() error {
+func (base MarketBuyCommand) Validate() error {
 	// TODO Add validation logic here
 	return nil
 }
 
 // Write, update internal fields
 // TODO should it be stateless?
-func (base *LimitBuyCommand) Prepare() error {
+func (base *MarketBuyCommand) Prepare() error {
 
 	validateErr := base.Validate()
 	if validateErr != nil {
@@ -49,14 +47,13 @@ func (base *LimitBuyCommand) Prepare() error {
 	if insErr != nil {
 		return insErr
 	}
-	base.Ins = *ins
 
-	baselinePrice := quotes[0].Price()
-	limitPrice := round(baselinePrice*base.PercentLimit/100.0, 0.01) // limit to floating point 2 digits
-	quantity := uint64(totalValue / limitPrice)
+	base.Ins = *ins
+	limitPrice := quotes[0].Price()
+	quantity := uint64(base.AmountLimit / limitPrice)
 
 	base.Opts = robinhood.OrderOpts{
-		Type:     robinhood.Limit,
+		Type:     robinhood.Market,
 		Quantity: quantity,
 		Side:     robinhood.Buy,
 		Price:    limitPrice,
@@ -65,7 +62,7 @@ func (base *LimitBuyCommand) Prepare() error {
 	return nil
 }
 
-func (base LimitBuyCommand) Execute() error {
+func (base MarketBuyCommand) Execute() error {
 	if base.Opts == (robinhood.OrderOpts{}) {
 		return errors.New("Please call Prepare()")
 	}

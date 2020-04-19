@@ -4,13 +4,12 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/weihesdlegend/Mew/clients"
-
 	"astuart.co/go-robinhood"
+	"github.com/weihesdlegend/Mew/clients"
 )
 
 // TODO comment
-type LimitBuyCommand struct {
+type LimitSellCommand struct {
 	RhClient     clients.Client
 	Ticker       string
 	PercentLimit float64
@@ -21,14 +20,14 @@ type LimitBuyCommand struct {
 }
 
 // Readonly
-func (base LimitBuyCommand) Validate() error {
+func (base LimitSellCommand) Validate() error {
 	// TODO Add validation logic here
 	return nil
 }
 
 // Write, update internal fields
 // TODO should it be stateless?
-func (base *LimitBuyCommand) Prepare() error {
+func (base *LimitSellCommand) Prepare() error {
 
 	validateErr := base.Validate()
 	if validateErr != nil {
@@ -58,14 +57,14 @@ func (base *LimitBuyCommand) Prepare() error {
 	base.Opts = robinhood.OrderOpts{
 		Type:     robinhood.Limit,
 		Quantity: quantity,
-		Side:     robinhood.Buy,
+		Side:     robinhood.Sell,
 		Price:    limitPrice,
 	}
 
 	return nil
 }
 
-func (base LimitBuyCommand) Execute() error {
+func (base LimitSellCommand) Execute() error {
 	if base.Opts == (robinhood.OrderOpts{}) {
 		return errors.New("Please call Prepare()")
 	}
