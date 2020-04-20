@@ -3,6 +3,7 @@ package tests
 import (
 	"astuart.co/go-robinhood"
 	"flag"
+	"github.com/stretchr/testify/mock"
 	"github.com/weihesdlegend/Mew/commands"
 	"testing"
 )
@@ -16,10 +17,10 @@ func TestPrepare(t *testing.T) {
 		{LastTradePrice: 100.0,
 			LastExtendedHoursTradePrice: 105.0},
 	}
-	mocker.On("GetQuote", *ticker).Return(quotes, nil)
+	mocker.On("GetQuote", mock.Anything).Return(quotes, nil)
 
 	ins := &robinhood.Instrument{}
-	mocker.On("GetInstrument", *ticker).Return(ins, nil)
+	mocker.On("GetInstrument", mock.Anything).Return(ins, nil)
 
 	cmd := commands.LimitBuyCommand{
 		RhClient: mocker,
