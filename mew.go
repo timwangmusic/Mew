@@ -26,11 +26,11 @@ func main() {
 	var cfg config.Configurations
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal("Config read error! %s", err)
+		log.Fatalf("Config read error! %v", err)
 	}
 
 	if err := viper.Unmarshal(&cfg); err != nil {
-		log.Error("Unable to decode into struct, %v", err)
+		log.Errorf("Unable to decode into struct, %v", err)
 		return
 	}
 
@@ -63,7 +63,7 @@ func main() {
 	rhClient, rhClientErr := robinhood.Dial(&cts)
 
 	if rhClientErr != nil {
-		log.Fatal("Robinhood authentication error %s", rhClientErr)
+		log.Fatalf("Robinhood authentication error %v", rhClientErr)
 	}
 
 	commands.InitCommands(rhClient)
