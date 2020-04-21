@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"astuart.co/go-robinhood"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/weihesdlegend/Mew/clients"
@@ -13,7 +12,9 @@ var MarketSellCmd cli.Command
 var LimitBuyCmd cli.Command
 var LimitSellCmd cli.Command
 
-func InitCommands(rhClient *robinhood.Client) {
+func InitCommands() {
+	rhClient := clients.GetRHClient()
+
 	LimitBuyCmd = cli.Command{
 		Name:    "limitbuy",
 		Aliases: []string{"lb"},
