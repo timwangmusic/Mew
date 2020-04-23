@@ -2,6 +2,7 @@ package commands
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -37,7 +38,7 @@ func (base *LimitBuyCommand) Prepare() error {
 	}
 
 	TICK := strings.ToUpper(ticker)
-	quotes, quoteErr := base.RhClient.GetQuote(TICK) // TODO make rhClient as interface for testing
+	quotes, quoteErr := base.RhClient.GetQuote(TICK)
 	if quoteErr != nil {
 		return quoteErr
 	}
@@ -63,22 +64,24 @@ func (base *LimitBuyCommand) Prepare() error {
 		Price:    limitPrice,
 	}
 
+	log.Infof("About to place %d shares of %s buy order at price %.2f", base.Opts.Quantity, base.Opts.Type, base.Opts.Price)
 	return nil
 }
 
 func (base LimitBuyCommand) Execute() error {
-	if base.Opts == (robinhood.OrderOpts{}) {
-		return errors.New("Please call Prepare()")
+	if v := reflect.ValueOf(base.Opts); v.IsZero() {
+		return errors.New("please call Prepare()")
 	}
 	// place order
 	// use ask price in quote to buy or sell
 	// time in force defaults to "good till canceled(gtc)"
 	orderRes, orderErr := base.RhClient.MakeOrder(&base.Ins, base.Opts)
-	log.Info("Order ", orderRes.ID, " placed")
 
 	if orderErr != nil {
 		return orderErr
 	}
+
+	log.Infof("Order placed with order ID %s", orderRes.ID)
 
 	return nil
 }

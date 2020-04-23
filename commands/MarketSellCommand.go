@@ -34,7 +34,7 @@ func (base *MarketSellCommand) Prepare() error {
 	}
 
 	TICK := strings.ToUpper(ticker)
-	quotes, quoteErr := base.RhClient.GetQuote(TICK) // TODO make rhClient as interface for testing
+	quotes, quoteErr := base.RhClient.GetQuote(TICK)
 	if quoteErr != nil {
 		return quoteErr
 	}
