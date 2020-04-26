@@ -83,7 +83,7 @@ func InitCommands() {
 			rhClient := clients.GetRHClient()
 			// init
 			lbCmd := &LimitBuyCommand{
-				RhClient:     &clients.RHClient{Client: rhClient},
+				RhClient:     rhClient,
 				Ticker:       ticker,
 				PercentLimit: limit,
 				AmountLimit:  totalValue,
@@ -124,7 +124,7 @@ func InitCommands() {
 			rhClient := clients.GetRHClient()
 			// init
 			lsCmd := &LimitSellCommand{
-				RhClient:     &clients.RHClient{Client: rhClient},
+				RhClient:     rhClient,
 				Ticker:       ticker,
 				PercentLimit: limitSell,
 				AmountLimit:  totalValue,
@@ -162,7 +162,7 @@ func InitCommands() {
 			rhClient := clients.GetRHClient()
 			// init
 			mbCmd := &MarketBuyCommand{
-				RhClient:    &clients.RHClient{Client: rhClient},
+				RhClient:    rhClient,
 				Ticker:      ticker,
 				AmountLimit: totalValue,
 			}
@@ -199,7 +199,7 @@ func InitCommands() {
 			rhClient := clients.GetRHClient()
 			// init
 			msCmd := &MarketSellCommand{
-				RhClient:    &clients.RHClient{Client: rhClient},
+				RhClient:    rhClient,
 				Ticker:      ticker,
 				AmountLimit: totalValue,
 			}

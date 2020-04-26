@@ -8,6 +8,6 @@ type CachedTokenSource struct {
 }
 
 // Token implements TokenSource
-func (p *CachedTokenSource) Token() (*oauth2.Token, error) {
+func (p CachedTokenSource) Token() (*oauth2.Token, error) {
 	return &p.RawToken, nil
 }
