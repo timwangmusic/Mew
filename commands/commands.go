@@ -28,7 +28,7 @@ func InitCommands() {
 		Action: func(ctx *cli.Context) error {
 			// init
 			lbCmd := &LimitBuyCommand{
-				RhClient:     &clients.RHClient{Client: rhClient},
+				RhClient:     rhClient,
 				Ticker:       ticker,
 				PercentLimit: limit,
 				AmountLimit:  totalValue,
@@ -68,7 +68,7 @@ func InitCommands() {
 		Action: func(ctx *cli.Context) error {
 			// init
 			lsCmd := &LimitSellCommand{
-				RhClient:     &clients.RHClient{Client: rhClient},
+				RhClient:     rhClient,
 				Ticker:       ticker,
 				PercentLimit: limitSell,
 				AmountLimit:  totalValue,
@@ -105,7 +105,7 @@ func InitCommands() {
 		Action: func(ctx *cli.Context) error {
 			// init
 			mbCmd := &MarketBuyCommand{
-				RhClient:    &clients.RHClient{Client: rhClient},
+				RhClient:    rhClient,
 				Ticker:      ticker,
 				AmountLimit: totalValue,
 			}
@@ -141,7 +141,7 @@ func InitCommands() {
 		Action: func(ctx *cli.Context) error {
 			// init
 			msCmd := &MarketSellCommand{
-				RhClient:    &clients.RHClient{Client: rhClient},
+				RhClient:    rhClient,
 				Ticker:      ticker,
 				AmountLimit: totalValue,
 			}

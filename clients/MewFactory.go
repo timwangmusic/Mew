@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"sync"
 
-	"astuart.co/go-robinhood"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/weihesdlegend/Mew/config"
@@ -13,14 +12,14 @@ import (
 )
 
 // Global singleton instances
-var gRHClient *robinhood.Client
+var gRHClient *RHClient
 var gAppConfig config.Configurations
 
 // once protectors
 var cfgOnce sync.Once
 var cliOnce sync.Once
 
-func GetRHClient() *robinhood.Client {
+func GetRHClient() *RHClient {
 	cliOnce.Do(func() {
 		log.Info("Creating rhClient...")
 
@@ -36,12 +35,12 @@ func GetRHClient() *robinhood.Client {
 			RawToken: rawToken,
 		}
 
-		rhClient, rhClientErr := robinhood.Dial(&cts)
+		gRHClient = &RHClient{}
+		rhClientErr := gRHClient.Init(&cts)
 		if rhClientErr != nil {
 			log.Fatal(rhClientErr)
 		}
 
-		gRHClient = rhClient
 	})
 
 	return gRHClient
