@@ -1,0 +1,54 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "MS",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/mew.go",
+            "env": {},
+            "args": ["s", "-t", "QQQ", "-v", "250"]
+        },
+        {
+            "name": "MB",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/mew.go",
+            "env": {},
+            "args": ["b", "-t", "QQQ", "-v", "250"]
+        },
+        {
+            "name": "LS",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/mew.go",
+            "env": {},
+            "args": ["ls", "-t", "QQQ", "-ls", "101", "-v", "250"]
+        },
+        {
+            "name": "LB",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/mew.go",
+            "env": {},
+            "args": ["lb", "-t", "MSFT", "-l", "99", "-v", "500"]
+        },
+        {
+            "name": "Auth",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/mew.go",
+            "env": {},
+            "args": ["auth", "-u", "username", "-p", "password", "-m", "mfa_code"]
+        }
+    ]
+}

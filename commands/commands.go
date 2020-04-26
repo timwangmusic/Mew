@@ -61,6 +61,7 @@ func InitCommands() {
 			viper.AddConfigPath(".")      // optionally look for config in the working directory
 
 			viper.Set("broker.name", "robinhood")
+			viper.Set("broker.user", user)
 			viper.Set("broker.encodedCredentials", tkJSONb64)
 			viper.WriteConfig() // Will override
 

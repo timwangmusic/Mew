@@ -8,5 +8,6 @@ type Configurations struct {
 // BrokerConfigurations exported
 type BrokerConfigurations struct {
 	Name               string
+	User               string
 	EncodedCredentials string
 }
