@@ -13,21 +13,6 @@ import (
 func main() {
 	log.Info("welcome to use the Mew stock assistant")
 
-	// TODO if cred is empty, please auth
-
-	/*
-		ts := &robinhood.OAuth{
-			Username: "user",
-			Password: "pwd",
-		}
-
-		tk, err := ts.Token()
-
-		tkJSON, err := json.Marshal(tk)
-		tkJSONb64 := base64.StdEncoding.EncodeToString(tkJSON)
-		log.Info(tkJSONb64) // here is your encoded credentials
-	*/
-
 	commands.InitCommands()
 
 	app := cli.NewApp()
@@ -36,6 +21,7 @@ func main() {
 		&commands.MarketSellCmd,
 		&commands.LimitBuyCmd,
 		&commands.LimitSellCmd,
+		&commands.AuthCmd, // Create Auth file
 	}
 
 	appRunErr := app.Run(os.Args)
