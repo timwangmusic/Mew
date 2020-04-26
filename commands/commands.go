@@ -1,7 +1,12 @@
 package commands
 
 import (
+	"encoding/base64"
+	"encoding/json"
+
+	"astuart.co/go-robinhood"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 	"github.com/weihesdlegend/Mew/clients"
 )
@@ -12,8 +17,57 @@ var MarketSellCmd cli.Command
 var LimitBuyCmd cli.Command
 var LimitSellCmd cli.Command
 
+// auth command
+var AuthCmd cli.Command
+
 func InitCommands() {
-	rhClient := clients.GetRHClient()
+
+	AuthCmd = cli.Command{
+		Name:    "authenticate",
+		Aliases: []string{"auth"},
+		Usage:   "-u usr -p pwd -m 1111",
+		Flags: []cli.Flag{
+			&userFlag,
+			&passwordFlag,
+			&mfaFlag,
+		},
+		Action: func(ctx *cli.Context) error {
+			// TODO move to AuthCommand.go
+			log.Info("Creating config file")
+			// Create new config from usr/pwd/mfa
+			ts := &robinhood.OAuth{
+				Username: user,
+				Password: password,
+				MFA:      mfa, // Optional
+			}
+
+			tk, err := ts.Token()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if tk.AccessToken == "" {
+				// For somereason the library doesn't return err when password is wrong
+				log.Fatal("Auth failed, check your user/password etc...")
+			}
+
+			tkJSON, err := json.Marshal(tk)
+			tkJSONb64 := base64.StdEncoding.EncodeToString(tkJSON)
+			// log.Info(tkJSONb64)
+
+			// .\config.yml
+			viper.SetConfigName("config") // name of config file (without extension)
+			viper.SetConfigType("yaml")   // REQUIRED if the config file does not have the extension in the name
+			viper.AddConfigPath(".")      // optionally look for config in the working directory
+
+			viper.Set("broker.name", "robinhood")
+			viper.Set("broker.user", user)
+			viper.Set("broker.encodedCredentials", tkJSONb64)
+			viper.WriteConfig() // Will override
+
+			return nil
+		},
+	}
 
 	LimitBuyCmd = cli.Command{
 		Name:    "limitbuy",
@@ -26,6 +80,7 @@ func InitCommands() {
 			&totalValueFlag,
 		},
 		Action: func(ctx *cli.Context) error {
+			rhClient := clients.GetRHClient()
 			// init
 			lbCmd := &LimitBuyCommand{
 				RhClient:     &clients.RHClient{Client: rhClient},
@@ -66,6 +121,7 @@ func InitCommands() {
 			&totalValueFlag,
 		},
 		Action: func(ctx *cli.Context) error {
+			rhClient := clients.GetRHClient()
 			// init
 			lsCmd := &LimitSellCommand{
 				RhClient:     &clients.RHClient{Client: rhClient},
@@ -103,6 +159,7 @@ func InitCommands() {
 			&totalValueFlag,
 		},
 		Action: func(ctx *cli.Context) error {
+			rhClient := clients.GetRHClient()
 			// init
 			mbCmd := &MarketBuyCommand{
 				RhClient:    &clients.RHClient{Client: rhClient},
@@ -139,6 +196,7 @@ func InitCommands() {
 			&totalValueFlag,
 		},
 		Action: func(ctx *cli.Context) error {
+			rhClient := clients.GetRHClient()
 			// init
 			msCmd := &MarketSellCommand{
 				RhClient:    &clients.RHClient{Client: rhClient},

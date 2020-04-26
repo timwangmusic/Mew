@@ -9,6 +9,11 @@ var limit float64
 var limitSell float64
 var totalValue float64
 
+// flag destination for auth
+var user string
+var password string
+var mfa string
+
 // supported flags
 var tickerFlag cli.StringFlag      // security name
 var sharesFlag cli.Uint64Flag      // number of shares to buy or sell
@@ -16,7 +21,33 @@ var limitBuyFlag cli.Float64Flag   // limit buy percentage to market price
 var limitSellFlag cli.Float64Flag  // limit sell percentage to market price
 var totalValueFlag cli.Float64Flag // limit order maximum transaction amount
 
+// flags for auth
+var userFlag cli.StringFlag
+var passwordFlag cli.StringFlag
+var mfaFlag cli.StringFlag
+
 func init() {
+	userFlag = cli.StringFlag{
+		Name:        "user",
+		Aliases:     []string{"u"},
+		Required:    true,
+		Destination: &user,
+	}
+
+	passwordFlag = cli.StringFlag{
+		Name:        "password",
+		Aliases:     []string{"p"},
+		Required:    true,
+		Destination: &password,
+	}
+
+	mfaFlag = cli.StringFlag{
+		Name:        "mfa",
+		Aliases:     []string{"m"},
+		Required:    false,
+		Destination: &mfa,
+	}
+
 	tickerFlag = cli.StringFlag{
 		Name:        "ticker",
 		Aliases:     []string{"t"},
