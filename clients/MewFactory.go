@@ -36,7 +36,7 @@ func GetRHClient() *RHClient {
 		}
 
 		gRHClient = &RHClient{}
-		rhClientErr := gRHClient.Init(&cts)
+		rhClientErr := gRHClient.Init(cts)
 		if rhClientErr != nil {
 			log.Fatal(rhClientErr)
 		}

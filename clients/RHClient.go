@@ -2,7 +2,7 @@ package clients
 
 import (
 	"astuart.co/go-robinhood"
-	"github.com/weihesdlegend/Mew/config"
+	"golang.org/x/oauth2"
 )
 
 type Client interface {
@@ -15,8 +15,8 @@ type RHClient struct {
 	Client *robinhood.Client
 }
 
-func (c *RHClient) Init(token *config.CachedTokenSource) (err error) {
-	c.Client, err = robinhood.Dial(*token)
+func (c *RHClient) Init(token oauth2.TokenSource) (err error) {
+	c.Client, err = robinhood.Dial(token)
 	return
 }
 
