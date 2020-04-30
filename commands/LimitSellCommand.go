@@ -2,9 +2,11 @@ package commands
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 
 	"astuart.co/go-robinhood"
+	log "github.com/sirupsen/logrus"
 	"github.com/weihesdlegend/Mew/clients"
 )
 
@@ -21,12 +23,23 @@ type LimitSellCommand struct {
 
 // Readonly
 func (base LimitSellCommand) Validate() error {
-	// TODO Add validation logic here
+	// TODO unit tests
+	if val := reflect.ValueOf(base.RhClient); val.IsZero() {
+		return errors.New("RhClient not set")
+	}
+
+	if base.AmountLimit <= 0 {
+		return errors.New("AmountLimit <= 0")
+	}
+
+	if base.PercentLimit <= 0 || base.PercentLimit >= 150 {
+		return errors.New("PercentLimit <= 0 || >= 150")
+	}
+
 	return nil
 }
 
 // Write, update internal fields
-// TODO should it be stateless?
 func (base *LimitSellCommand) Prepare() error {
 
 	validateErr := base.Validate()
@@ -59,6 +72,9 @@ func (base *LimitSellCommand) Prepare() error {
 		Quantity: quantity,
 		Side:     robinhood.Sell,
 		Price:    limitPrice,
+
+		ExtendedHours: true,          // default to allow after hour
+		TimeInForce:   robinhood.GFD, // default to GoodForDay
 	}
 
 	return nil
@@ -71,11 +87,13 @@ func (base LimitSellCommand) Execute() error {
 	// place order
 	// use ask price in quote to buy or sell
 	// time in force defaults to "good till canceled(gtc)"
-	_, orderErr := base.RhClient.MakeOrder(&base.Ins, base.Opts)
+	orderRes, orderErr := base.RhClient.MakeOrder(&base.Ins, base.Opts)
 
 	if orderErr != nil {
 		return orderErr
 	}
+
+	log.Infof("Order placed with order ID %s", orderRes.ID)
 
 	return nil
 }

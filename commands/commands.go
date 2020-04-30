@@ -33,7 +33,7 @@ func InitCommands() {
 		},
 		Action: func(ctx *cli.Context) error {
 			// TODO move to AuthCommand.go
-			log.Info("Creating config file")
+			log.Info("Creating config file for ", user)
 			// Create new config from usr/pwd/mfa
 			ts := &robinhood.OAuth{
 				Username: user,
@@ -92,7 +92,6 @@ func InitCommands() {
 			// Preview
 			err := lbCmd.Prepare()
 			if err != nil {
-				log.Error(err)
 				return err
 			}
 
@@ -133,7 +132,6 @@ func InitCommands() {
 			// Preview
 			err := lsCmd.Prepare()
 			if err != nil {
-				log.Error(err)
 				return err
 			}
 
@@ -170,7 +168,6 @@ func InitCommands() {
 			// Preview
 			err := mbCmd.Prepare()
 			if err != nil {
-				log.Error(err)
 				return err
 			}
 			log.Info(OrderToString(mbCmd.Opts, mbCmd.Ins))
@@ -207,7 +204,6 @@ func InitCommands() {
 			// Preview
 			err := msCmd.Prepare()
 			if err != nil {
-				log.Error(err)
 				return err
 			}
 			log.Info(OrderToString(msCmd.Opts, msCmd.Ins))
