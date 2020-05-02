@@ -21,7 +21,6 @@ type MarketSellCommand struct {
 
 // Readonly
 func (base MarketSellCommand) Validate() error {
-	// TODO unit tests
 	if val := reflect.ValueOf(base.RhClient); val.IsZero() {
 		return errors.New("RhClient not set")
 	}

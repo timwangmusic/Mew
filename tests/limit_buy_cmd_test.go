@@ -7,49 +7,56 @@ import (
 	"testing"
 )
 
-var mocker = new(RHClientMock)
-var cmd = commands.LimitBuyCommand{
-	RhClient: mocker,
-	AmountLimit: 1000.0,
+var limitBuyCommand = commands.LimitBuyCommand{
+	RhClient:     rhClientMocker,
+	AmountLimit:  1000.0,
 	PercentLimit: 99.0,
+}
+
+func setupMocker() {
+	lastPrice := 100.0
+	quotes := []robinhood.Quote{
+		{
+			LastTradePrice:              lastPrice,
+			LastExtendedHoursTradePrice: lastPrice,
+		},
+	}
+	rhClientMocker.On("GetQuote", mock.AnythingOfType("string")).Return(quotes, nil)
+
+	ins := &robinhood.Instrument{}
+	rhClientMocker.On("GetInstrument", mock.AnythingOfType("string")).Return(ins, nil)
 }
 
 // test limit buy max $1000 worth of stock with limit of 99%
 // mock current price at 100.0
 // valid case
-func TestLimitBuy(t *testing.T) {
-	quotes := []robinhood.Quote{
-		{
-			LastTradePrice: 100.0,
-			LastExtendedHoursTradePrice: 100.0,
-		},
-	}
-	mocker.On("GetQuote", mock.AnythingOfType("string")).Return(quotes, nil)
+func TestLimitBuyCommand(t *testing.T) {
+	setupMocker()
 
-	ins := &robinhood.Instrument{}
-	mocker.On("GetInstrument", mock.AnythingOfType("string")).Return(ins, nil)
-
-	if err := cmd.Prepare(); err != nil {
-		t.Error(err)
+	if err := limitBuyCommand.Validate(); err != nil {
+		t.Fatal(err)
 	}
 
-	if cmd.Opts.Price != 99.00 {
-		t.Errorf("expected price to be 103.95, got %.2f", cmd.Opts.Price)
+	if err := limitBuyCommand.Prepare(); err != nil {
+		t.Fatal(err)
 	}
 
-	if cmd.Opts.Quantity != 10 {
-		t.Errorf("expected quantity to be 10, got %d", cmd.Opts.Quantity)
+	lastPrice := 100.0
+	expectedLimitPrice := 99.00
+	if limitBuyCommand.Opts.Price != limitBuyCommand.PercentLimit*lastPrice/100.0 {
+		t.Errorf("expected price to be %.2f, got %.2f", expectedLimitPrice, limitBuyCommand.Opts.Price)
 	}
 
-	mocker.On("MakeOrder", mock.Anything, mock.Anything).Return(&robinhood.OrderOutput{ID: "33521"}, nil)
-
-	cmd.Opts = robinhood.OrderOpts{
-		Price: 105,
+	expectedQuantity := uint64(10)
+	if limitBuyCommand.Opts.Quantity != expectedQuantity {
+		t.Errorf("expected quantity to be %d, got %d", expectedQuantity, limitBuyCommand.Opts.Quantity)
 	}
 
-	if err := cmd.Execute(); err != nil {
-		t.Error(err)
+	rhClientMocker.On("MakeOrder", mock.Anything, mock.Anything).Return(&robinhood.OrderOutput{ID: "33521"}, nil)
+
+	if err := limitBuyCommand.Execute(); err != nil {
+		t.Fatal(err)
 	}
 
-	mocker.AssertExpectations(t)
+	rhClientMocker.AssertExpectations(t)
 }

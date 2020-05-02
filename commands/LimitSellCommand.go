@@ -23,7 +23,6 @@ type LimitSellCommand struct {
 
 // Readonly
 func (base LimitSellCommand) Validate() error {
-	// TODO unit tests
 	if val := reflect.ValueOf(base.RhClient); val.IsZero() {
 		return errors.New("RhClient not set")
 	}
@@ -48,7 +47,7 @@ func (base *LimitSellCommand) Prepare() error {
 	}
 
 	TICK := strings.ToUpper(ticker)
-	quotes, quoteErr := base.RhClient.GetQuote(TICK) // TODO make rhClient as interface for testing
+	quotes, quoteErr := base.RhClient.GetQuote(TICK)
 	if quoteErr != nil {
 		return quoteErr
 	}
