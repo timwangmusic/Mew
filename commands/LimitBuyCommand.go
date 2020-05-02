@@ -15,8 +15,9 @@ import (
 type LimitBuyCommand struct {
 	RhClient     clients.Client
 	Ticker       string
-	PercentLimit float64
+	PercentLimit float64 // 99.95 stand for 99.95%
 	AmountLimit  float64
+
 	//
 	Ins  robinhood.Instrument
 	Opts robinhood.OrderOpts
@@ -24,7 +25,19 @@ type LimitBuyCommand struct {
 
 // Readonly
 func (base LimitBuyCommand) Validate() error {
-	// TODO Add validation logic here
+	// TODO unit tests
+	if val := reflect.ValueOf(base.RhClient); val.IsZero() {
+		return errors.New("RhClient not set")
+	}
+
+	if base.AmountLimit <= 0 {
+		return errors.New("AmountLimit <= 0")
+	}
+
+	if base.PercentLimit <= 0 || base.PercentLimit >= 150 {
+		return errors.New("PercentLimit <= 0 || >= 150")
+	}
+
 	return nil
 }
 
@@ -62,9 +75,11 @@ func (base *LimitBuyCommand) Prepare() error {
 		Quantity: quantity,
 		Side:     robinhood.Buy,
 		Price:    limitPrice,
+		// TODO, make it into config? or env_var
+		ExtendedHours: true,          // default to allow after hour
+		TimeInForce:   robinhood.GFD, // default to GoodForDay
 	}
 
-	log.Infof("About to place %d shares of %s buy order at price %.2f", base.Opts.Quantity, base.Opts.Type, base.Opts.Price)
 	return nil
 }
 

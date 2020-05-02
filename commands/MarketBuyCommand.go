@@ -2,6 +2,7 @@ package commands
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 
 	"astuart.co/go-robinhood"
@@ -20,7 +21,15 @@ type MarketBuyCommand struct {
 
 // Readonly
 func (base MarketBuyCommand) Validate() error {
-	// TODO Add validation logic here
+	// TODO unit tests
+	if val := reflect.ValueOf(base.RhClient); val.IsZero() {
+		return errors.New("RhClient not set")
+	}
+
+	if base.AmountLimit <= 0 {
+		return errors.New("AmountLimit <= 0")
+	}
+
 	return nil
 }
 
@@ -49,14 +58,16 @@ func (base *MarketBuyCommand) Prepare() error {
 	}
 
 	base.Ins = *ins
-	limitPrice := quotes[0].Price()
-	quantity := uint64(base.AmountLimit / limitPrice)
+	price := quotes[0].Price()
+	quantity := uint64(base.AmountLimit / price)
 
 	base.Opts = robinhood.OrderOpts{
-		Type:     robinhood.Market,
-		Quantity: quantity,
-		Side:     robinhood.Buy,
-		Price:    limitPrice,
+		Type:          robinhood.Market,
+		Quantity:      quantity,
+		Side:          robinhood.Buy,
+		Price:         price,
+		ExtendedHours: true,          // default to allow after hour
+		TimeInForce:   robinhood.GFD, // default to GoodForDay
 	}
 
 	return nil
