@@ -52,7 +52,7 @@ func init() {
 		Name:        "ticker",
 		Aliases:     []string{"t"},
 		Value:       "YANG",
-		Required:    false,
+		Required:    true,
 		Destination: &ticker,
 	}
 
