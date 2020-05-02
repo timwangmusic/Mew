@@ -32,8 +32,8 @@ func (base LimitSellCommand) Validate() error {
 		return errors.New("AmountLimit <= 0")
 	}
 
-	if base.PercentLimit <= 0 || base.PercentLimit >= 150 {
-		return errors.New("PercentLimit <= 0 || >= 150")
+	if base.PercentLimit <= 0 {
+		return errors.New("PercentLimit <= 0")
 	}
 
 	return nil

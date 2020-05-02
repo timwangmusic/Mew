@@ -58,14 +58,14 @@ func (base *MarketSellCommand) Prepare() error {
 	}
 
 	base.Ins = *ins
-	limitPrice := quotes[0].Price()
-	quantity := uint64(base.AmountLimit / limitPrice)
+	price := quotes[0].Price()
+	quantity := uint64(base.AmountLimit / price)
 
 	base.Opts = robinhood.OrderOpts{
 		Type:          robinhood.Market,
 		Quantity:      quantity,
 		Side:          robinhood.Sell,
-		Price:         limitPrice,
+		Price:         price,
 		ExtendedHours: true,          // default to allow after hour
 		TimeInForce:   robinhood.GFD, // default to GoodForDay
 	}
