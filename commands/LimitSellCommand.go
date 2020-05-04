@@ -2,6 +2,7 @@ package commands
 
 import (
 	"errors"
+	"github.com/weihesdlegend/Mew/utils"
 	"reflect"
 	"strings"
 
@@ -63,7 +64,12 @@ func (base *LimitSellCommand) Prepare() error {
 	base.Ins = *ins
 
 	baselinePrice := quotes[0].Price()
-	limitPrice := round(baselinePrice*base.PercentLimit/100.0, 0.01) // limit to floating point 2 digits
+	log.Infof("quoted price is %f", baselinePrice)
+	limitPrice, roundErr := utils.Round(baselinePrice*base.PercentLimit/100.0, 0.01) // limit to floating point 2 digits
+	if roundErr != nil {
+		return roundErr
+	}
+	log.Infof("limit price is %f", limitPrice)
 	quantity := uint64(base.AmountLimit / limitPrice)
 
 	base.Opts = robinhood.OrderOpts{
