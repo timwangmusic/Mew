@@ -3,6 +3,7 @@ package commands
 import (
 	"encoding/base64"
 	"encoding/json"
+	"github.com/weihesdlegend/Mew/utils"
 
 	"astuart.co/go-robinhood"
 	log "github.com/sirupsen/logrus"
@@ -95,7 +96,7 @@ func InitCommands() {
 				return err
 			}
 
-			log.Info(OrderToString(lbCmd.Opts, lbCmd.Ins))
+			log.Info(utils.OrderToString(lbCmd.Opts, lbCmd.Ins))
 
 			// Exec
 			err = lbCmd.Execute()
@@ -135,7 +136,7 @@ func InitCommands() {
 				return err
 			}
 
-			log.Info(OrderToString(lsCmd.Opts, lsCmd.Ins))
+			log.Info(utils.OrderToString(lsCmd.Opts, lsCmd.Ins))
 			// Exec
 			err = lsCmd.Execute()
 			if err != nil {
@@ -170,7 +171,7 @@ func InitCommands() {
 			if err != nil {
 				return err
 			}
-			log.Info(OrderToString(mbCmd.Opts, mbCmd.Ins))
+			log.Info(utils.OrderToString(mbCmd.Opts, mbCmd.Ins))
 
 			// Exec
 			err = mbCmd.Execute()
@@ -206,7 +207,7 @@ func InitCommands() {
 			if err != nil {
 				return err
 			}
-			log.Info(OrderToString(msCmd.Opts, msCmd.Ins))
+			log.Info(utils.OrderToString(msCmd.Opts, msCmd.Ins))
 
 			// Exec
 			err = msCmd.Execute()

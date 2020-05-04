@@ -1,14 +1,19 @@
-package commands
+package utils
 
 import (
 	"fmt"
 	"math"
+	"strconv"
 
 	"astuart.co/go-robinhood"
 )
 
-func round(x, unit float64) float64 {
-	return math.Round(x/unit) * unit
+// round input to 2 digits
+func Round(x, unit float64) (float64, error) {
+	tmp := math.Round(x/unit) * unit
+	resString := fmt.Sprintf("%.2f", tmp)
+	res, err := strconv.ParseFloat(resString, 64)
+	return res, err
 }
 
 // About to place <market> <buy> for <10> shares of <QQQ> at <$200>
