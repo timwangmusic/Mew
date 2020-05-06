@@ -3,6 +3,7 @@ package commands
 import (
 	"encoding/base64"
 	"encoding/json"
+
 	"github.com/weihesdlegend/Mew/utils"
 
 	"astuart.co/go-robinhood"
@@ -17,12 +18,9 @@ var MarketBuyCmd cli.Command
 var MarketSellCmd cli.Command
 var LimitBuyCmd cli.Command
 var LimitSellCmd cli.Command
-
-// auth command
-var AuthCmd cli.Command
+var AuthCmd cli.Command // auth command
 
 func InitCommands() {
-
 	AuthCmd = cli.Command{
 		Name:    "authenticate",
 		Aliases: []string{"auth"},

@@ -8,6 +8,13 @@ import (
 	"github.com/weihesdlegend/Mew/commands"
 )
 
+var (
+	// Version The app version
+	Version = "v0.1.0"
+	// BuildDate The app build date in yyyy-mm-dd
+	BuildDate = "2020-05-05"
+)
+
 // example input from CLI: mew buy -s 100 -t AAPL
 // output: purchased 100 shares of AAPL with market order, and total cost is xxx
 func main() {
@@ -15,7 +22,11 @@ func main() {
 
 	commands.InitCommands()
 
-	app := cli.NewApp()
+	app := &cli.App{
+		Name:    "Mew",
+		Version: Version + "_build_" + BuildDate,
+	}
+
 	app.Commands = []*cli.Command{
 		&commands.MarketBuyCmd,
 		&commands.MarketSellCmd,
