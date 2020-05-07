@@ -127,6 +127,7 @@ func InitCommands() {
 			&sharesFlag,
 			&limitSellFlag,
 			&totalValueFlag,
+			&percentToSellFlag,
 		},
 		Action: func(ctx *cli.Context) error {
 			rhClient := clients.GetRHClient()
@@ -200,6 +201,7 @@ func InitCommands() {
 			&tickerFlag,
 			// TODO &sharesFlag,
 			&totalValueFlag,
+			&percentToSellFlag,
 		},
 		Action: func(ctx *cli.Context) error {
 			rhClient := clients.GetRHClient()
@@ -215,7 +217,11 @@ func InitCommands() {
 			if err != nil {
 				return err
 			}
-			log.Info(utils.OrderToString(msCmd.Opts, msCmd.Ins))
+			for ticker, ins := range msCmd.Ins {
+				if opt, ok := msCmd.Opts[ticker]; ok {
+					log.Info(utils.OrderToString(opt, *ins))
+				}
+			}
 
 			// Exec
 			err = msCmd.Execute()

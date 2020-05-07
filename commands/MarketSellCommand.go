@@ -2,6 +2,7 @@ package commands
 
 import (
 	"errors"
+	log "github.com/sirupsen/logrus"
 	"reflect"
 	"strings"
 
@@ -12,11 +13,11 @@ import (
 // TODO comment
 type MarketSellCommand struct {
 	RhClient    clients.Client
-	Ticker      string
 	AmountLimit float64
+	Ticker      string
 	//
-	Ins  robinhood.Instrument
-	Opts robinhood.OrderOpts
+	Ins  map[string]*robinhood.Instrument
+	Opts map[string]robinhood.OrderOpts
 }
 
 // Readonly
@@ -29,61 +30,88 @@ func (base MarketSellCommand) Validate() error {
 		return errors.New("AmountLimit <= 0")
 	}
 
+	if len(base.Ticker) == 0 || len(strings.TrimSpace(base.Ticker)) == 0 {
+		return errors.New("ticker cannot be empty")
+	}
 	return nil
 }
 
 // Write, update internal fields
-// TODO should it be stateless?
 func (base *MarketSellCommand) Prepare() error {
-
 	validateErr := base.Validate()
 	if validateErr != nil {
 		return validateErr
 	}
 
-	TICK := strings.ToUpper(ticker)
-	quotes, quoteErr := base.RhClient.GetQuote(TICK)
-	if quoteErr != nil {
-		return quoteErr
+	base.Ins = make(map[string]*robinhood.Instrument)
+	base.Opts = make(map[string]robinhood.OrderOpts)
+
+	ticker = strings.ToUpper(base.Ticker)
+	tickers := make([]string, 0)
+	if strings.HasPrefix(ticker, "@") {
+		fields := strings.Split(ticker, "@")
+		var batch string
+		if len(fields) > 1 {
+			batch = fields[1]
+		}
+		for _, val := range strings.Split(batch, "_") {
+			tickers = append(tickers, val)
+		}
+	} else {
+		tickers = append(tickers, ticker)
 	}
 
-	if len(quotes) == 0 {
-		return errors.New("no quote obtained from provided security name, please check")
-	}
-
-	ins, insErr := base.RhClient.GetInstrument(TICK)
-	if insErr != nil {
-		return insErr
-	}
-
-	base.Ins = *ins
-	price := quotes[0].Price()
-	quantity := uint64(base.AmountLimit / price)
-
-	base.Opts = robinhood.OrderOpts{
-		Type:          robinhood.Market,
-		Quantity:      quantity,
-		Side:          robinhood.Sell,
-		Price:         price,
-		ExtendedHours: true,          // default to allow after hour
-		TimeInForce:   robinhood.GFD, // default to GoodForDay
+	if err := base.PrepareInsAndOpts(tickers); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (base MarketSellCommand) Execute() error {
-	if base.Opts == (robinhood.OrderOpts{}) {
-		return errors.New("Please call Prepare()")
+func (base *MarketSellCommand) PrepareInsAndOpts(tickers []string) (err error) {
+	for _, ticker := range tickers {
+		ins, insErr := base.RhClient.GetInstrument(ticker)
+		if insErr != nil {
+			log.Error(insErr)
+			err = insErr
+			continue
+		}
+		base.Ins[ticker] = ins
+
+		quotes, quoteErr := base.RhClient.GetQuote(ticker)
+		if quoteErr != nil {
+			log.Error(quoteErr)
+			err = quoteErr
+			continue
+		}
+		if len(quotes) == 0 {
+			err = errors.New("no quote obtained from provided security name, please check")
+			continue
+		}
+		price := quotes[0].Price()
+		quantity := uint64(base.AmountLimit / price)
+		opt := robinhood.OrderOpts{
+			Type:          robinhood.Market,
+			Quantity:      quantity,
+			Side:          robinhood.Sell,
+			Price:         price,
+			ExtendedHours: true,          // default to allow after hour
+			TimeInForce:   robinhood.GFD, // default to GoodForDay
+		}
+		base.Opts[ticker] = opt
 	}
+	return
+}
+
+func (base MarketSellCommand) Execute() (err error) {
 	// place order
 	// use ask price in quote to buy or sell
 	// time in force defaults to "good till canceled(gtc)"
-	_, orderErr := base.RhClient.MakeOrder(&base.Ins, base.Opts)
-
-	if orderErr != nil {
-		return orderErr
+	for ticker, ins := range base.Ins {
+		if opt, ok := base.Opts[ticker]; ok {
+			_, err = base.RhClient.MakeOrder(ins, opt)
+		}
 	}
 
-	return nil
+	return
 }

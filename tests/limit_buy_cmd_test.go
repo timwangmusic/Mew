@@ -17,6 +17,7 @@ func setupMocker() {
 	lastPrice := 100.0
 	quotes := []robinhood.Quote{
 		{
+			Symbol: "QQQ",
 			LastTradePrice:              lastPrice,
 			LastExtendedHoursTradePrice: lastPrice,
 		},
