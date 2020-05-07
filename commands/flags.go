@@ -8,6 +8,7 @@ var shares uint64
 var limit float64
 var limitSell float64
 var totalValue float64
+var sellPercent float64
 
 // flag destination for auth
 var user string
@@ -15,11 +16,12 @@ var password string
 var mfa string
 
 // supported flags
-var tickerFlag cli.StringFlag      // security name
-var sharesFlag cli.Uint64Flag      // number of shares to buy or sell
-var limitBuyFlag cli.Float64Flag   // limit buy percentage to market price
-var limitSellFlag cli.Float64Flag  // limit sell percentage to market price
-var totalValueFlag cli.Float64Flag // limit order maximum transaction amount
+var tickerFlag cli.StringFlag         // security name
+var sharesFlag cli.Uint64Flag         // number of shares to buy or sell
+var limitBuyFlag cli.Float64Flag      // limit buy percentage to market price
+var limitSellFlag cli.Float64Flag     // limit sell percentage to market price
+var totalValueFlag cli.Float64Flag    // limit order maximum transaction amount
+var percentToSellFlag cli.Float64Flag // percentage of total amount to sell
 
 // flags for auth
 var userFlag cli.StringFlag
@@ -86,5 +88,13 @@ func init() {
 		Required:    false,
 		Value:       500.0,
 		Destination: &totalValue,
+	}
+
+	percentToSellFlag = cli.Float64Flag{
+		Name:        "percentToSell",
+		Aliases:     []string{"ps"},
+		Required:    false,
+		Value:       10.0,
+		Destination: &sellPercent,
 	}
 }
