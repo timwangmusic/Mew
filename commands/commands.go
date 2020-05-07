@@ -3,6 +3,7 @@ package commands
 import (
 	"encoding/base64"
 	"encoding/json"
+	"os"
 
 	"github.com/weihesdlegend/Mew/utils"
 
@@ -52,12 +53,21 @@ func InitCommands() {
 
 			tkJSON, err := json.Marshal(tk)
 			tkJSONb64 := base64.StdEncoding.EncodeToString(tkJSON)
-			// log.Info(tkJSONb64)
+			if err != nil {
+				log.Fatal(err)
+			}
 
 			// .\config.yml
 			viper.SetConfigName("config") // name of config file (without extension)
 			viper.SetConfigType("yaml")   // REQUIRED if the config file does not have the extension in the name
 			viper.AddConfigPath(".")      // optionally look for config in the working directory
+
+			// create empty file if not exist
+			file, err := os.OpenFile("./config.yml", os.O_RDONLY|os.O_CREATE, 0666)
+			if err != nil {
+				log.Fatal(err)
+			}
+			file.Close() // release it
 
 			viper.Set("broker.name", "robinhood")
 			viper.Set("broker.user", user)
