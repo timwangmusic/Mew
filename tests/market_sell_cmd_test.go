@@ -33,6 +33,12 @@ func TestMarketSellCommand(t *testing.T) {
 		if marketSellCommand.Opts[ticker].Quantity != expectedQuantity {
 			t.Errorf("expected quantity to be %d, got %d", expectedQuantity, marketSellCommand.Opts[ticker].Quantity)
 		}
+		if marketSellCommand.Opts[ticker].Side != robinhood.Sell {
+			t.Errorf("expect side to be sell, got %d", marketSellCommand.Opts[ticker].Side)
+		}
+		if marketSellCommand.Opts[ticker].Type != robinhood.Market {
+			t.Errorf("expect type to be market, got %d", marketSellCommand.Opts[ticker].Type)
+		}
 	}
 
 	rhClientMocker.On("MakeOrder", mock.Anything, mock.Anything).Return(&robinhood.OrderOutput{ID: "33524"}, nil)

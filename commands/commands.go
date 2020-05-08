@@ -145,7 +145,11 @@ func InitCommands() {
 				return err
 			}
 
-			log.Info(utils.OrderToString(lsCmd.Opts, lsCmd.Ins))
+			for ticker, ins := range lsCmd.Ins {
+				if opt, ok := lsCmd.Opts[ticker]; ok {
+					log.Info(utils.OrderToString(*opt, *ins))
+				}
+			}
 			// Exec
 			err = lsCmd.Execute()
 			if err != nil {
@@ -219,7 +223,7 @@ func InitCommands() {
 			}
 			for ticker, ins := range msCmd.Ins {
 				if opt, ok := msCmd.Opts[ticker]; ok {
-					log.Info(utils.OrderToString(opt, *ins))
+					log.Info(utils.OrderToString(*opt, *ins))
 				}
 			}
 

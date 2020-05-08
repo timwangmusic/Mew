@@ -2,7 +2,6 @@ package commands
 
 import (
 	"errors"
-	log "github.com/sirupsen/logrus"
 	"reflect"
 	"strings"
 
@@ -17,7 +16,7 @@ type MarketSellCommand struct {
 	Ticker      string
 	//
 	Ins  map[string]*robinhood.Instrument
-	Opts map[string]robinhood.OrderOpts
+	Opts map[string]*robinhood.OrderOpts
 }
 
 // Readonly
@@ -44,72 +43,27 @@ func (base *MarketSellCommand) Prepare() error {
 	}
 
 	base.Ins = make(map[string]*robinhood.Instrument)
-	base.Opts = make(map[string]robinhood.OrderOpts)
+	base.Opts = make(map[string]*robinhood.OrderOpts)
 
-	ticker = strings.ToUpper(base.Ticker)
-	tickers := make([]string, 0)
-	if strings.HasPrefix(ticker, "@") {
-		fields := strings.Split(ticker, "@")
-		var batch string
-		if len(fields) > 1 {
-			batch = fields[1]
-		}
-		for _, val := range strings.Split(batch, "_") {
-			tickers = append(tickers, val)
-		}
-	} else {
-		tickers = append(tickers, ticker)
-	}
+	tickers := ParseTicker(base.Ticker)
 
-	if err := base.PrepareInsAndOpts(tickers); err != nil {
+	var err error
+	base.Ins, base.Opts, err = PrepareInsAndOpts(tickers, base.AmountLimit, 100.0, base.RhClient)
+	if err != nil {
 		return err
 	}
 
+	for _, opt := range base.Opts {
+		opt.Side = robinhood.Sell
+		opt.Type = robinhood.Market
+	}
 	return nil
 }
 
-func (base *MarketSellCommand) PrepareInsAndOpts(tickers []string) (err error) {
-	for _, ticker := range tickers {
-		ins, insErr := base.RhClient.GetInstrument(ticker)
-		if insErr != nil {
-			log.Error(insErr)
-			err = insErr
-			continue
-		}
-		base.Ins[ticker] = ins
-
-		quotes, quoteErr := base.RhClient.GetQuote(ticker)
-		if quoteErr != nil {
-			log.Error(quoteErr)
-			err = quoteErr
-			continue
-		}
-		if len(quotes) == 0 {
-			err = errors.New("no quote obtained from provided security name, please check")
-			continue
-		}
-		price := quotes[0].Price()
-		quantity := uint64(base.AmountLimit / price)
-		opt := robinhood.OrderOpts{
-			Type:          robinhood.Market,
-			Quantity:      quantity,
-			Side:          robinhood.Sell,
-			Price:         price,
-			ExtendedHours: true,          // default to allow after hour
-			TimeInForce:   robinhood.GFD, // default to GoodForDay
-		}
-		base.Opts[ticker] = opt
-	}
-	return
-}
-
 func (base MarketSellCommand) Execute() (err error) {
-	// place order
-	// use ask price in quote to buy or sell
-	// time in force defaults to "good for day(gfd)"
 	for ticker, ins := range base.Ins {
 		if opt, ok := base.Opts[ticker]; ok {
-			_, err = base.RhClient.MakeOrder(ins, opt)
+			_, err = base.RhClient.MakeOrder(ins, *opt)
 		}
 	}
 	return

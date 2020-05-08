@@ -2,12 +2,10 @@ package commands
 
 import (
 	"errors"
-	"github.com/weihesdlegend/Mew/utils"
 	"reflect"
 	"strings"
 
 	"astuart.co/go-robinhood"
-	log "github.com/sirupsen/logrus"
 	"github.com/weihesdlegend/Mew/clients"
 )
 
@@ -18,8 +16,8 @@ type LimitSellCommand struct {
 	PercentLimit float64
 	AmountLimit  float64
 	//
-	Ins  robinhood.Instrument
-	Opts robinhood.OrderOpts
+	Ins  map[string]*robinhood.Instrument
+	Opts map[string]*robinhood.OrderOpts
 }
 
 // Readonly
@@ -36,69 +34,44 @@ func (base LimitSellCommand) Validate() error {
 		return errors.New("PercentLimit <= 0")
 	}
 
+	if len(base.Ticker) == 0 || len(strings.TrimSpace(base.Ticker)) == 0 {
+		return errors.New("ticker cannot be empty")
+	}
+
 	return nil
 }
 
 // Write, update internal fields
 func (base *LimitSellCommand) Prepare() error {
-
 	validateErr := base.Validate()
 	if validateErr != nil {
 		return validateErr
 	}
 
-	TICK := strings.ToUpper(base.Ticker)
-	quotes, quoteErr := base.RhClient.GetQuote(TICK)
-	if quoteErr != nil {
-		return quoteErr
+	base.Ins = make(map[string]*robinhood.Instrument)
+	base.Opts = make(map[string]*robinhood.OrderOpts)
+
+	tickers := ParseTicker(base.Ticker)
+
+	var err error
+	base.Ins, base.Opts, err = PrepareInsAndOpts(tickers, base.AmountLimit, base.PercentLimit, base.RhClient)
+	if err != nil {
+		return err
 	}
 
-	if len(quotes) == 0 {
-		return errors.New("no quote obtained from provided security name, please check")
-	}
-
-	ins, insErr := base.RhClient.GetInstrument(TICK)
-	if insErr != nil {
-		return insErr
-	}
-	base.Ins = *ins
-
-	baselinePrice := quotes[0].Price()
-	log.Infof("quoted price is %f", baselinePrice)
-	limitPrice, roundErr := utils.Round(baselinePrice*base.PercentLimit/100.0, 0.01) // limit to floating point 2 digits
-	if roundErr != nil {
-		return roundErr
-	}
-	log.Infof("limit price is %f", limitPrice)
-	quantity := uint64(base.AmountLimit / limitPrice)
-
-	base.Opts = robinhood.OrderOpts{
-		Type:     robinhood.Limit,
-		Quantity: quantity,
-		Side:     robinhood.Sell,
-		Price:    limitPrice,
-
-		ExtendedHours: true,          // default to allow after hour
-		TimeInForce:   robinhood.GFD, // default to GoodForDay
+	for _, opt := range base.Opts {
+		opt.Side = robinhood.Sell
+		opt.Type = robinhood.Limit
 	}
 
 	return nil
 }
 
-func (base LimitSellCommand) Execute() error {
-	if base.Opts == (robinhood.OrderOpts{}) {
-		return errors.New("Please call Prepare()")
+func (base LimitSellCommand) Execute() (err error) {
+	for ticker, ins := range base.Ins {
+		if opt, ok := base.Opts[ticker]; ok {
+			_, err = base.RhClient.MakeOrder(ins, *opt)
+		}
 	}
-	// place order
-	// use ask price in quote to buy or sell
-	// time in force defaults to "good till canceled(gtc)"
-	orderRes, orderErr := base.RhClient.MakeOrder(&base.Ins, base.Opts)
-
-	if orderErr != nil {
-		return orderErr
-	}
-
-	log.Infof("Order placed with order ID %s", orderRes.ID)
-
 	return nil
 }
