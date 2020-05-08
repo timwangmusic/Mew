@@ -10,13 +10,14 @@ import (
 var marketBuyCommand = commands.MarketBuyCommand{
 	RhClient:    rhClientMocker,
 	AmountLimit: 1000.0,
+	Ticker:      "QQQ",
 }
 
 // test market buy max $1000 worth of stock
 // mock current price at 100.0
 // valid case
 func TestMarketBuyCommand(t *testing.T) {
-	setupMocker()
+	setupMocker([]string{"QQQ"})
 
 	if err := marketBuyCommand.Validate(); err != nil {
 		t.Error(err)

@@ -41,7 +41,7 @@ func (base *MarketBuyCommand) Prepare() error {
 		return validateErr
 	}
 
-	TICK := strings.ToUpper(ticker)
+	TICK := strings.ToUpper(base.Ticker)
 	quotes, quoteErr := base.RhClient.GetQuote(TICK)
 	if quoteErr != nil {
 		return quoteErr

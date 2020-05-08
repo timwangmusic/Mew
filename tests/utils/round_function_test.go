@@ -8,7 +8,7 @@ import (
 )
 
 func TestRoundFunction(t *testing.T) {
-	price := 100.55555555  // 8-digit decimal after dot
+	price := 100.55555555 // 8-digit decimal after dot
 
 	expectedOneDigit := 100.6
 

@@ -11,13 +11,14 @@ var limitSellCommand = commands.LimitSellCommand{
 	RhClient:     rhClientMocker,
 	PercentLimit: 101.0,
 	AmountLimit:  1010.0,
+	Ticker:       "QQQ",
 }
 
 // test limit sell $1010 worth of stock with limit of 101%
 // mock current price at 100.0
 // valid case
 func TestLimitSellCommand(t *testing.T) {
-	setupMocker()
+	setupMocker([]string{"QQQ"})
 
 	if err := limitSellCommand.Validate(); err != nil {
 		t.Error(err)

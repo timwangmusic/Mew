@@ -106,12 +106,11 @@ func (base *MarketSellCommand) PrepareInsAndOpts(tickers []string) (err error) {
 func (base MarketSellCommand) Execute() (err error) {
 	// place order
 	// use ask price in quote to buy or sell
-	// time in force defaults to "good till canceled(gtc)"
+	// time in force defaults to "good for day(gfd)"
 	for ticker, ins := range base.Ins {
 		if opt, ok := base.Opts[ticker]; ok {
 			_, err = base.RhClient.MakeOrder(ins, opt)
 		}
 	}
-
 	return
 }

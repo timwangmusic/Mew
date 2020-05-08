@@ -10,14 +10,15 @@ import (
 var marketSellCommand = commands.MarketSellCommand{
 	RhClient:    rhClientMocker,
 	AmountLimit: 1000,
-	Ticker: "QQQ",
+	Ticker:      "@QQQ_MSFT",
 }
 
 // test market sell $1000 worth of stock
 // mock current price at 100.0
 // valid case
 func TestMarketSellCommand(t *testing.T) {
-	setupMocker()
+	tickers := []string{"QQQ", "MSFT"}
+	setupMocker(tickers)
 
 	if err := marketSellCommand.Validate(); err != nil {
 		t.Error(err)
@@ -28,8 +29,10 @@ func TestMarketSellCommand(t *testing.T) {
 	}
 
 	expectedQuantity := uint64(10)
-	if marketSellCommand.Opts["QQQ"].Quantity != expectedQuantity {
-		t.Errorf("expected quantity to be %d, got %d", expectedQuantity, marketSellCommand.Opts["QQQ"].Quantity)
+	for _, ticker := range tickers {
+		if marketSellCommand.Opts[ticker].Quantity != expectedQuantity {
+			t.Errorf("expected quantity to be %d, got %d", expectedQuantity, marketSellCommand.Opts[ticker].Quantity)
+		}
 	}
 
 	rhClientMocker.On("MakeOrder", mock.Anything, mock.Anything).Return(&robinhood.OrderOutput{ID: "33524"}, nil)
