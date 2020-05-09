@@ -129,7 +129,7 @@ func InitCommands() {
 			&totalValueFlag,
 			&percentToSellFlag,
 		},
-		Action: func(ctx *cli.Context) error {
+		Action: func(ctx *cli.Context) (err error) {
 			rhClient := clients.GetRHClient()
 
 			tickers := ParseTicker(ticker)
@@ -142,18 +142,18 @@ func InitCommands() {
 					PercentLimit: limitSell,
 				}
 				// preview
-				if err := lsCmd.Prepare(); err != nil {
-					return err
+				if err = lsCmd.Prepare(); err != nil {
+					continue
 				}
 
 				log.Info(utils.OrderToString(lsCmd.Opts, *lsCmd.Ins))
 
-				if err := lsCmd.Execute(); err != nil {
-					return err
+				if err = lsCmd.Execute(); err != nil {
+					continue
 				}
 			}
 
-			return nil
+			return
 		},
 	}
 
@@ -203,7 +203,7 @@ func InitCommands() {
 			&totalValueFlag,
 			&percentToSellFlag,
 		},
-		Action: func(ctx *cli.Context) error {
+		Action: func(ctx *cli.Context) (err error) {
 			rhClient := clients.GetRHClient()
 
 			tickers := ParseTicker(ticker)
@@ -215,18 +215,18 @@ func InitCommands() {
 					AmountLimit: totalValue,
 				}
 				// preview
-				if err := msCmd.Prepare(); err != nil {
-					return err
+				if err = msCmd.Prepare(); err != nil {
+					continue
 				}
 
 				log.Info(utils.OrderToString(msCmd.Opts, *msCmd.Ins))
 
-				if err := msCmd.Execute(); err != nil {
-					return err
+				if err = msCmd.Execute(); err != nil {
+					continue
 				}
 			}
 
-			return nil
+			return
 		},
 	}
 }
