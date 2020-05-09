@@ -131,30 +131,26 @@ func InitCommands() {
 		},
 		Action: func(ctx *cli.Context) error {
 			rhClient := clients.GetRHClient()
-			// init
-			lsCmd := &LimitSellCommand{
-				RhClient:     rhClient,
-				Ticker:       ticker,
-				PercentLimit: limitSell,
-				AmountLimit:  totalValue,
-			}
 
-			// Preview
-			err := lsCmd.Prepare()
-			if err != nil {
-				return err
-			}
-
-			for ticker, ins := range lsCmd.Ins {
-				if opt, ok := lsCmd.Opts[ticker]; ok {
-					log.Info(utils.OrderToString(*opt, *ins))
+			tickers := ParseTicker(ticker)
+			for _, ticker := range tickers {
+				// init
+				lsCmd := &LimitSellCommand{
+					RhClient:    rhClient,
+					Ticker:      ticker,
+					AmountLimit: totalValue,
+					PercentLimit: limitSell,
 				}
-			}
-			// Exec
-			err = lsCmd.Execute()
-			if err != nil {
-				log.Error(err)
-				return err
+				// preview
+				if err := lsCmd.Prepare(); err != nil {
+					return err
+				}
+
+				log.Info(utils.OrderToString(lsCmd.Opts, *lsCmd.Ins))
+
+				if err := lsCmd.Execute(); err != nil {
+					return err
+				}
 			}
 
 			return nil
@@ -209,29 +205,25 @@ func InitCommands() {
 		},
 		Action: func(ctx *cli.Context) error {
 			rhClient := clients.GetRHClient()
-			// init
-			msCmd := &MarketSellCommand{
-				RhClient:    rhClient,
-				Ticker:      ticker,
-				AmountLimit: totalValue,
-			}
 
-			// Preview
-			err := msCmd.Prepare()
-			if err != nil {
-				return err
-			}
-			for ticker, ins := range msCmd.Ins {
-				if opt, ok := msCmd.Opts[ticker]; ok {
-					log.Info(utils.OrderToString(*opt, *ins))
+			tickers := ParseTicker(ticker)
+			for _, ticker := range tickers {
+				// init
+				msCmd := &MarketSellCommand{
+					RhClient:    rhClient,
+					Ticker:      ticker,
+					AmountLimit: totalValue,
 				}
-			}
+				// preview
+				if err := msCmd.Prepare(); err != nil {
+					return err
+				}
 
-			// Exec
-			err = msCmd.Execute()
-			if err != nil {
-				log.Error(err)
-				return err
+				log.Info(utils.OrderToString(msCmd.Opts, *msCmd.Ins))
+
+				if err := msCmd.Execute(); err != nil {
+					return err
+				}
 			}
 
 			return nil

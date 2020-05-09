@@ -11,14 +11,14 @@ var limitSellCommand = commands.LimitSellCommand{
 	RhClient:     rhClientMocker,
 	PercentLimit: 101.0,
 	AmountLimit:  1010.0,
-	Ticker:       "@QQQ_MSFT",
+	Ticker:       "QQQ",
 }
 
 // test limit sell $1010 worth of stock with limit of 101%
 // mock current price at 100.0
 // valid case
 func TestLimitSellCommand(t *testing.T) {
-	tickers := []string{"QQQ", "MSFT"}
+	tickers := []string{"QQQ"}
 	setupMocker(tickers)
 
 	if err := limitSellCommand.Validate(); err != nil {
@@ -32,19 +32,17 @@ func TestLimitSellCommand(t *testing.T) {
 	expectedLimitPrice := 101.00
 	expectedQuantity := uint64(10)
 
-	for _, ticker := range tickers {
-		if limitSellCommand.Opts[ticker].Price != limitSellCommand.PercentLimit*lastPrice/100.0 {
-			t.Errorf("expected price to be %.2f, got %.2f", expectedLimitPrice, limitSellCommand.Opts[ticker].Price)
-		}
-		if limitSellCommand.Opts[ticker].Quantity != expectedQuantity {
-			t.Errorf("expected quantity to be %d, got %d", expectedQuantity, limitSellCommand.Opts[ticker].Quantity)
-		}
-		if limitSellCommand.Opts[ticker].Side != robinhood.Sell {
-			t.Errorf("expect side to be sell, got %d", limitSellCommand.Opts[ticker].Side)
-		}
-		if limitSellCommand.Opts[ticker].Type != robinhood.Limit {
-			t.Errorf("expect type to be market, got %d", limitSellCommand.Opts[ticker].Type)
-		}
+	if limitSellCommand.Opts.Price != limitSellCommand.PercentLimit*lastPrice/100.0 {
+		t.Errorf("expected price to be %.2f, got %.2f", expectedLimitPrice, limitSellCommand.Opts.Price)
+	}
+	if limitSellCommand.Opts.Quantity != expectedQuantity {
+		t.Errorf("expected quantity to be %d, got %d", expectedQuantity, limitSellCommand.Opts.Quantity)
+	}
+	if limitSellCommand.Opts.Side != robinhood.Sell {
+		t.Errorf("expect side to be sell, got %d", limitSellCommand.Opts.Side)
+	}
+	if limitSellCommand.Opts.Type != robinhood.Limit {
+		t.Errorf("expect type to be market, got %d", limitSellCommand.Opts.Type)
 	}
 
 	rhClientMocker.On("MakeOrder", mock.Anything, mock.Anything).Return(&robinhood.OrderOutput{ID: "33522"}, nil)

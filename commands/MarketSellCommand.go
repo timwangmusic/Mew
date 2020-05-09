@@ -15,8 +15,8 @@ type MarketSellCommand struct {
 	AmountLimit float64
 	Ticker      string
 	//
-	Ins  map[string]*robinhood.Instrument
-	Opts map[string]*robinhood.OrderOpts
+	Ins  *robinhood.Instrument
+	Opts robinhood.OrderOpts
 }
 
 // Readonly
@@ -42,29 +42,18 @@ func (base *MarketSellCommand) Prepare() error {
 		return validateErr
 	}
 
-	base.Ins = make(map[string]*robinhood.Instrument)
-	base.Opts = make(map[string]*robinhood.OrderOpts)
-
-	tickers := ParseTicker(base.Ticker)
-
 	var err error
-	base.Ins, base.Opts, err = PrepareInsAndOpts(tickers, base.AmountLimit, 100.0, base.RhClient)
+	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, 100.0, base.RhClient)
 	if err != nil {
 		return err
 	}
 
-	for _, opt := range base.Opts {
-		opt.Side = robinhood.Sell
-		opt.Type = robinhood.Market
-	}
+	base.Opts.Side = robinhood.Sell
+	base.Opts.Type = robinhood.Market
 	return nil
 }
 
 func (base MarketSellCommand) Execute() (err error) {
-	for ticker, ins := range base.Ins {
-		if opt, ok := base.Opts[ticker]; ok {
-			_, err = base.RhClient.MakeOrder(ins, *opt)
-		}
-	}
+	_, err = base.RhClient.MakeOrder(base.Ins, base.Opts)
 	return
 }

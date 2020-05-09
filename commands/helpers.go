@@ -3,7 +3,6 @@ package commands
 import (
 	"astuart.co/go-robinhood"
 	"errors"
-	"github.com/sirupsen/logrus"
 	"github.com/weihesdlegend/Mew/clients"
 	"github.com/weihesdlegend/Mew/utils"
 	"strings"
@@ -27,45 +26,32 @@ func ParseTicker(ticker string) []string {
 	return tickers
 }
 
-func PrepareInsAndOpts(tickers []string, AmountLimit float64, PercentLimit float64, rhClient clients.Client) (Ins map[string]*robinhood.Instrument,
-	Opts map[string]*robinhood.OrderOpts, err error) {
-	Ins = make(map[string]*robinhood.Instrument)
-	Opts = make(map[string]*robinhood.OrderOpts)
-
-	for _, ticker := range tickers {
-		ins, insErr := rhClient.GetInstrument(ticker)
-		if insErr != nil {
-			logrus.Error(insErr)
-			err = insErr
-			continue
-		}
-		Ins[ticker] = ins
-
-		quotes, quoteErr := rhClient.GetQuote(ticker)
-		if quoteErr != nil {
-			logrus.Error(quoteErr)
-			err = quoteErr
-			continue
-		}
-		if len(quotes) == 0 {
-			err = errors.New("no quote obtained from provided security name, please check")
-			continue
-		}
-		price := quotes[0].Price()
-		price, roundErr := utils.Round(price*PercentLimit/100.0, 0.01) // limit to floating point 2 digits
-		if roundErr != nil {
-			err = roundErr
-			continue
-		}
-		quantity := uint64(AmountLimit / price)
-		opt := robinhood.OrderOpts{
-			Quantity:      quantity,
-			Price:         price,
-			ExtendedHours: true,          // default to allow after hour
-			TimeInForce:   robinhood.GFD, // default to GoodForDay
-		}
-		Opts[ticker] = &opt
+func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64, rhClient clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
+	Ins, insErr := rhClient.GetInstrument(ticker)
+	if err = insErr; err != nil {
+		return
 	}
+
+	quotes, quoteErr := rhClient.GetQuote(ticker)
+	if err = quoteErr; err != nil {
+		return
+	}
+	if len(quotes) == 0 {
+		err = errors.New("no quote obtained from provided security name, please check")
+		return
+	}
+	price := quotes[0].Price()
+	price, roundErr := utils.Round(price*PercentLimit/100.0, 0.01) // limit to floating point 2 digits
+	if err = roundErr; err != nil {
+		return
+	}
+	quantity := uint64(AmountLimit / price)
+	Opts = robinhood.OrderOpts{
+		Quantity:      quantity,
+		Price:         price,
+		ExtendedHours: true,          // default to allow after hour
+		TimeInForce:   robinhood.GFD, // default to GoodForDay
+	}
+
 	return
 }
-
