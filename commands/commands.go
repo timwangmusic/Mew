@@ -132,13 +132,18 @@ func InitCommands() {
 		Action: func(ctx *cli.Context) (err error) {
 			rhClient := clients.GetRHClient()
 
-			tickers := ParseTicker(ticker)
+			tickers, tickerParseErr := ParseTicker(ticker)
+			if tickerParseErr != nil {
+				err = tickerParseErr
+				return
+			}
+
 			for _, ticker := range tickers {
 				// init
 				lsCmd := &LimitSellCommand{
-					RhClient:    rhClient,
-					Ticker:      ticker,
-					AmountLimit: totalValue,
+					RhClient:     rhClient,
+					Ticker:       ticker,
+					AmountLimit:  totalValue,
 					PercentLimit: limitSell,
 				}
 				// preview
@@ -206,7 +211,12 @@ func InitCommands() {
 		Action: func(ctx *cli.Context) (err error) {
 			rhClient := clients.GetRHClient()
 
-			tickers := ParseTicker(ticker)
+			tickers, tickerParseErr := ParseTicker(ticker)
+			if tickerParseErr != nil {
+				err = tickerParseErr
+				return
+			}
+
 			for _, ticker := range tickers {
 				// init
 				msCmd := &MarketSellCommand{

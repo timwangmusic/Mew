@@ -5,25 +5,36 @@ import (
 	"errors"
 	"github.com/weihesdlegend/Mew/clients"
 	"github.com/weihesdlegend/Mew/utils"
+	"regexp"
 	"strings"
 )
 
-func ParseTicker(ticker string) []string {
+const (
+	TickerSeparator = "_"
+)
+
+func ParseTicker(ticker string) ([]string, error) {
 	ticker = strings.ToUpper(ticker)
 	tickers := make([]string, 0)
+	regex, _ := regexp.Compile(`[A-Z]+`)
 	if strings.HasPrefix(ticker, "@") {
 		fields := strings.Split(ticker, "@")
 		var batch string
 		if len(fields) > 1 {
 			batch = fields[1]
 		}
-		for _, val := range strings.Split(batch, "_") {
-			tickers = append(tickers, val)
+		for _, val := range strings.Split(batch, TickerSeparator) {
+			if regex.MatchString(val) {
+				tickers = append(tickers, val)
+			}
 		}
 	} else {
 		tickers = append(tickers, ticker)
 	}
-	return tickers
+	if len(tickers) == 0 {
+		return tickers, errors.New("ticker parsing error")
+	}
+	return tickers, nil
 }
 
 func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64, rhClient clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
