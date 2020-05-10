@@ -127,32 +127,38 @@ func InitCommands() {
 			&sharesFlag,
 			&limitSellFlag,
 			&totalValueFlag,
+			&percentToSellFlag,
 		},
-		Action: func(ctx *cli.Context) error {
+		Action: func(ctx *cli.Context) (err error) {
 			rhClient := clients.GetRHClient()
-			// init
-			lsCmd := &LimitSellCommand{
-				RhClient:     rhClient,
-				Ticker:       ticker,
-				PercentLimit: limitSell,
-				AmountLimit:  totalValue,
+
+			tickers, tickerParseErr := ParseTicker(ticker)
+			if tickerParseErr != nil {
+				err = tickerParseErr
+				return
 			}
 
-			// Preview
-			err := lsCmd.Prepare()
-			if err != nil {
-				return err
+			for _, ticker := range tickers {
+				// init
+				lsCmd := &LimitSellCommand{
+					RhClient:     rhClient,
+					Ticker:       ticker,
+					AmountLimit:  totalValue,
+					PercentLimit: limitSell,
+				}
+				// preview
+				if err = lsCmd.Prepare(); err != nil {
+					continue
+				}
+
+				log.Info(utils.OrderToString(lsCmd.Opts, *lsCmd.Ins))
+
+				if err = lsCmd.Execute(); err != nil {
+					continue
+				}
 			}
 
-			log.Info(utils.OrderToString(lsCmd.Opts, lsCmd.Ins))
-			// Exec
-			err = lsCmd.Execute()
-			if err != nil {
-				log.Error(err)
-				return err
-			}
-
-			return nil
+			return
 		},
 	}
 
@@ -200,31 +206,37 @@ func InitCommands() {
 			&tickerFlag,
 			// TODO &sharesFlag,
 			&totalValueFlag,
+			&percentToSellFlag,
 		},
-		Action: func(ctx *cli.Context) error {
+		Action: func(ctx *cli.Context) (err error) {
 			rhClient := clients.GetRHClient()
-			// init
-			msCmd := &MarketSellCommand{
-				RhClient:    rhClient,
-				Ticker:      ticker,
-				AmountLimit: totalValue,
+
+			tickers, tickerParseErr := ParseTicker(ticker)
+			if tickerParseErr != nil {
+				err = tickerParseErr
+				return
 			}
 
-			// Preview
-			err := msCmd.Prepare()
-			if err != nil {
-				return err
-			}
-			log.Info(utils.OrderToString(msCmd.Opts, msCmd.Ins))
+			for _, ticker := range tickers {
+				// init
+				msCmd := &MarketSellCommand{
+					RhClient:    rhClient,
+					Ticker:      ticker,
+					AmountLimit: totalValue,
+				}
+				// preview
+				if err = msCmd.Prepare(); err != nil {
+					continue
+				}
 
-			// Exec
-			err = msCmd.Execute()
-			if err != nil {
-				log.Error(err)
-				return err
+				log.Info(utils.OrderToString(msCmd.Opts, *msCmd.Ins))
+
+				if err = msCmd.Execute(); err != nil {
+					continue
+				}
 			}
 
-			return nil
+			return
 		},
 	}
 }

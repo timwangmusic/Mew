@@ -11,17 +11,18 @@ var limitBuyCommand = commands.LimitBuyCommand{
 	RhClient:     rhClientMocker,
 	AmountLimit:  1000.0,
 	PercentLimit: 99.0,
+	Ticker:       "QQQ",
 }
 
-func setupMocker() {
+func setupMocker(tickers []string) {
 	lastPrice := 100.0
-	quotes := []robinhood.Quote{
-		{
-			LastTradePrice:              lastPrice,
-			LastExtendedHoursTradePrice: lastPrice,
-		},
+	quotes := []robinhood.Quote{{
+		LastTradePrice:              lastPrice,
+		LastExtendedHoursTradePrice: lastPrice,
+	}}
+	for _, ticker := range tickers {
+		rhClientMocker.On("GetQuote", ticker).Return(quotes, nil)
 	}
-	rhClientMocker.On("GetQuote", mock.AnythingOfType("string")).Return(quotes, nil)
 
 	ins := &robinhood.Instrument{}
 	rhClientMocker.On("GetInstrument", mock.AnythingOfType("string")).Return(ins, nil)
@@ -31,7 +32,7 @@ func setupMocker() {
 // mock current price at 100.0
 // valid case
 func TestLimitBuyCommand(t *testing.T) {
-	setupMocker()
+	setupMocker([]string{"QQQ"})
 
 	if err := limitBuyCommand.Validate(); err != nil {
 		t.Fatal(err)

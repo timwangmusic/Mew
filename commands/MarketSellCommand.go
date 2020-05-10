@@ -12,10 +12,10 @@ import (
 // TODO comment
 type MarketSellCommand struct {
 	RhClient    clients.Client
-	Ticker      string
 	AmountLimit float64
+	Ticker      string
 	//
-	Ins  robinhood.Instrument
+	Ins  *robinhood.Instrument
 	Opts robinhood.OrderOpts
 }
 
@@ -29,61 +29,31 @@ func (base MarketSellCommand) Validate() error {
 		return errors.New("AmountLimit <= 0")
 	}
 
+	if len(base.Ticker) == 0 || len(strings.TrimSpace(base.Ticker)) == 0 {
+		return errors.New("ticker cannot be empty")
+	}
 	return nil
 }
 
 // Write, update internal fields
-// TODO should it be stateless?
 func (base *MarketSellCommand) Prepare() error {
-
 	validateErr := base.Validate()
 	if validateErr != nil {
 		return validateErr
 	}
 
-	TICK := strings.ToUpper(ticker)
-	quotes, quoteErr := base.RhClient.GetQuote(TICK)
-	if quoteErr != nil {
-		return quoteErr
+	var err error
+	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, 100.0, base.RhClient)
+	if err != nil {
+		return err
 	}
 
-	if len(quotes) == 0 {
-		return errors.New("no quote obtained from provided security name, please check")
-	}
-
-	ins, insErr := base.RhClient.GetInstrument(TICK)
-	if insErr != nil {
-		return insErr
-	}
-
-	base.Ins = *ins
-	price := quotes[0].Price()
-	quantity := uint64(base.AmountLimit / price)
-
-	base.Opts = robinhood.OrderOpts{
-		Type:          robinhood.Market,
-		Quantity:      quantity,
-		Side:          robinhood.Sell,
-		Price:         price,
-		ExtendedHours: true,          // default to allow after hour
-		TimeInForce:   robinhood.GFD, // default to GoodForDay
-	}
-
+	base.Opts.Side = robinhood.Sell
+	base.Opts.Type = robinhood.Market
 	return nil
 }
 
-func (base MarketSellCommand) Execute() error {
-	if base.Opts == (robinhood.OrderOpts{}) {
-		return errors.New("Please call Prepare()")
-	}
-	// place order
-	// use ask price in quote to buy or sell
-	// time in force defaults to "good till canceled(gtc)"
-	_, orderErr := base.RhClient.MakeOrder(&base.Ins, base.Opts)
-
-	if orderErr != nil {
-		return orderErr
-	}
-
-	return nil
+func (base MarketSellCommand) Execute() (err error) {
+	_, err = base.RhClient.MakeOrder(base.Ins, base.Opts)
+	return
 }
