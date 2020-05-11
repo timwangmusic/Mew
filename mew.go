@@ -40,12 +40,3 @@ func main() {
 		log.Fatal(appRunErr)
 	}
 }
-
-/*
-s, ls, with amount or percent
-
--t a-zA-Z.
--t @ALL // predefined
--t @SPY_QQQ_CCL // expend the -t to support @ and _
-
-*/
