@@ -148,12 +148,15 @@ func InitCommands() {
 				}
 				// preview
 				if err = lsCmd.Prepare(); err != nil {
+					log.Error("Prepare() for ", ticker, " error : ", err)
 					continue
 				}
 
 				log.Info(utils.OrderToString(lsCmd.Opts, *lsCmd.Ins))
 
 				if err = lsCmd.Execute(); err != nil {
+					log.Error("Execute() for ", ticker, " error : ", err)
+
 					continue
 				}
 			}
