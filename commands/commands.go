@@ -91,12 +91,6 @@ func InitCommands() {
 		Action: func(ctx *cli.Context) error {
 			rhClient := clients.GetRHClient()
 
-			// TODO
-			pos, _ := rhClient.GetPositions()
-
-			log.Info(pos)
-			// TODO
-
 			// init
 			lbCmd := &LimitBuyCommand{
 				RhClient:     rhClient,
