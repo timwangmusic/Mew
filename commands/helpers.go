@@ -16,6 +16,7 @@ const (
 	TickerSeparator = "_"
 )
 
+// generate order summary for user to confirm
 func previewHelper(ticker string, opts *robinhood.OrderOpts) (err error) {
 	// to simplify testing
 	if reflect.ValueOf(BufferReader).IsNil() {
@@ -43,6 +44,7 @@ func previewHelper(ticker string, opts *robinhood.OrderOpts) (err error) {
 	return nil
 }
 
+// parse raw ticker string from user input
 func ParseTicker(ticker string) ([]string, error) {
 	ticker = strings.ToUpper(ticker)
 	tickers := make([]string, 0)
@@ -67,6 +69,8 @@ func ParseTicker(ticker string) ([]string, error) {
 	return tickers, nil
 }
 
+// make http calls to RH to get instrument data and current security pricing
+// generate order options
 func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64, rhClient clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
 	Ins, insErr := rhClient.GetInstrument(ticker)
 	if err = insErr; err != nil {
