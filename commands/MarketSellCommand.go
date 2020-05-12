@@ -50,6 +50,11 @@ func (base *MarketSellCommand) Prepare() error {
 
 	base.Opts.Side = robinhood.Sell
 	base.Opts.Type = robinhood.Market
+
+	if err := previewHelper(base.Ticker, &base.Opts); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -57,6 +57,11 @@ func (base *LimitSellCommand) Prepare() error {
 
 	base.Opts.Side = robinhood.Sell
 	base.Opts.Type = robinhood.Limit
+
+	if err := previewHelper(base.Ticker, &base.Opts); err != nil {
+		return err
+	}
+
 	return nil
 }
 

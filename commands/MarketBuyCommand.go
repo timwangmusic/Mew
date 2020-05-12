@@ -69,6 +69,10 @@ func (base *MarketBuyCommand) Prepare() error {
 		TimeInForce:   robinhood.GFD, // default to GoodForDay
 	}
 
+	if err := previewHelper(base.Ticker, &base.Opts); err != nil {
+		return err
+	}
+
 	return nil
 }
 

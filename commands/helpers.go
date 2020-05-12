@@ -2,6 +2,8 @@ package commands
 
 import (
 	"errors"
+	"fmt"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -13,6 +15,33 @@ import (
 const (
 	TickerSeparator = "_"
 )
+
+func previewHelper(ticker string, opts *robinhood.OrderOpts) (err error) {
+	// to simplify testing
+	if reflect.ValueOf(BufferReader).IsNil() {
+		return nil
+	}
+
+	fmt.Printf("Please confirm the order details.\n"+
+		"Order type: %s %s\t"+
+		"Security: %s\t"+
+		"Quantity: %d\t"+
+		"price: %.2f [y/n]",
+		opts.Type, opts.Side, ticker, opts.Quantity, opts.Price)
+
+	// wait for user confirmation
+	for {
+		text, _ := BufferReader.ReadString('\n')
+		text = strings.Replace(text, "\n", "", -1)
+		text = strings.ToLower(text)
+		if text == "y" {
+			break
+		} else {
+			return errors.New("order is cancelled")
+		}
+	}
+	return nil
+}
 
 func ParseTicker(ticker string) ([]string, error) {
 	ticker = strings.ToUpper(ticker)

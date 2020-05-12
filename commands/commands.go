@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"bufio"
 	"encoding/base64"
 	"encoding/json"
 	"os"
@@ -21,7 +22,10 @@ var LimitBuyCmd cli.Command
 var LimitSellCmd cli.Command
 var AuthCmd cli.Command // auth command
 
+var BufferReader *bufio.Reader
+
 func InitCommands() {
+	BufferReader = bufio.NewReader(os.Stdin)
 	AuthCmd = cli.Command{
 		Name:    "authenticate",
 		Aliases: []string{"auth"},
@@ -47,7 +51,7 @@ func InitCommands() {
 			}
 
 			if tk.AccessToken == "" {
-				// For somereason the library doesn't return err when password is wrong
+				// For some reason the library doesn't return err when password is wrong
 				log.Fatal("Auth failed, check your user/password etc...")
 			}
 
