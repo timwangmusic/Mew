@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"astuart.co/go-robinhood"
+	"github.com/coolboy/go-robinhood"
 	log "github.com/sirupsen/logrus"
 	"github.com/weihesdlegend/Mew/clients"
 )

@@ -7,7 +7,7 @@ import (
 
 	"github.com/weihesdlegend/Mew/utils"
 
-	"astuart.co/go-robinhood"
+	"github.com/coolboy/go-robinhood"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
@@ -90,6 +90,13 @@ func InitCommands() {
 		},
 		Action: func(ctx *cli.Context) error {
 			rhClient := clients.GetRHClient()
+
+			// TODO
+			pos, _ := rhClient.GetPositions()
+
+			log.Info(pos)
+			// TODO
+
 			// init
 			lbCmd := &LimitBuyCommand{
 				RhClient:     rhClient,

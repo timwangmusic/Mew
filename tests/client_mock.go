@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"astuart.co/go-robinhood"
+	"github.com/coolboy/go-robinhood"
 	"github.com/stretchr/testify/mock"
 )
 
