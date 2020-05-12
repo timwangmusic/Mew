@@ -86,7 +86,7 @@ func (base *LimitBuyCommand) Prepare() error {
 		TimeInForce:   robinhood.GFD, // default to GoodForDay
 	}
 
-	if err := previewHelper(base.Ticker, &base.Opts); err != nil {
+	if err := previewHelper(base.Ticker, base.Opts.Type, base.Opts.Side, base.Opts.Quantity, base.Opts.Price); err != nil {
 		return err
 	}
 

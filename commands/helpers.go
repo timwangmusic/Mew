@@ -17,7 +17,7 @@ const (
 )
 
 // generate order summary for user to confirm
-func previewHelper(ticker string, opts *robinhood.OrderOpts) (err error) {
+func previewHelper(ticker string, transactionType robinhood.OrderType, side robinhood.OrderSide, quantity uint64, price float64) (err error) {
 	// to simplify testing
 	if reflect.ValueOf(BufferReader).IsNil() {
 		return nil
@@ -28,7 +28,7 @@ func previewHelper(ticker string, opts *robinhood.OrderOpts) (err error) {
 		"Security: %s\t"+
 		"Quantity: %d\t"+
 		"price: %.2f [y/n]",
-		opts.Type, opts.Side, ticker, opts.Quantity, opts.Price)
+		transactionType, side, ticker, quantity, price)
 
 	// wait for user confirmation
 	for {
