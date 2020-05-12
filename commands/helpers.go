@@ -2,6 +2,8 @@ package commands
 
 import (
 	"errors"
+	"fmt"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -14,6 +16,35 @@ const (
 	TickerSeparator = "_"
 )
 
+// generate order summary for user to confirm
+func previewHelper(ticker string, transactionType robinhood.OrderType, side robinhood.OrderSide, quantity uint64, price float64) (err error) {
+	// to simplify testing
+	if reflect.ValueOf(BufferReader).IsNil() {
+		return nil
+	}
+
+	fmt.Printf("Please confirm the order details.\n"+
+		"Order type: %s %s\t"+
+		"Security: %s\t"+
+		"Quantity: %d\t"+
+		"price: %.2f [y/n]",
+		transactionType, side, ticker, quantity, price)
+
+	// wait for user confirmation
+	for {
+		text, _ := BufferReader.ReadString('\n')
+		text = strings.Replace(text, "\n", "", -1)
+		text = strings.ToLower(text)
+		if text == "y" {
+			break
+		} else {
+			return errors.New("order is cancelled")
+		}
+	}
+	return nil
+}
+
+// parse raw ticker string from user input
 func ParseTicker(ticker string) ([]string, error) {
 	ticker = strings.ToUpper(ticker)
 	tickers := make([]string, 0)
@@ -38,6 +69,8 @@ func ParseTicker(ticker string) ([]string, error) {
 	return tickers, nil
 }
 
+// make http calls to RH to get instrument data and current security pricing
+// generate order options
 func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64, rhClient clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
 	Ins, insErr := rhClient.GetInstrument(ticker)
 	if err = insErr; err != nil {
