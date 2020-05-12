@@ -5,7 +5,7 @@ import (
 	"math"
 	"strconv"
 
-	"astuart.co/go-robinhood"
+	"github.com/coolboy/go-robinhood"
 )
 
 // round input to 2 digits

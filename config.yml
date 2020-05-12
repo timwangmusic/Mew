@@ -1,4 +1,0 @@
-
-broker:
-  name: robinhood
-  encodedCredentials: <PUT_YOUR_CRED_HERE>

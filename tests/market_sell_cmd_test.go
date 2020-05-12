@@ -1,10 +1,11 @@
 package tests
 
 import (
-	"astuart.co/go-robinhood"
+	"testing"
+
+	"github.com/coolboy/go-robinhood"
 	"github.com/stretchr/testify/mock"
 	"github.com/weihesdlegend/Mew/commands"
-	"testing"
 )
 
 var marketSellCommand = commands.MarketSellCommand{

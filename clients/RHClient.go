@@ -1,14 +1,18 @@
 package clients
 
 import (
-	"astuart.co/go-robinhood"
+	"github.com/coolboy/go-robinhood"
 	"golang.org/x/oauth2"
 )
 
 type Client interface {
 	GetQuote(ticker string) ([]robinhood.Quote, error)
 	GetInstrument(ticker string) (*robinhood.Instrument, error)
+
+	// We should rename to Order() to align to internal robinhood calls
 	MakeOrder(*robinhood.Instrument, robinhood.OrderOpts) (*robinhood.OrderOutput, error)
+
+	GetPositions() ([]robinhood.Position, error)
 }
 
 type RHClient struct {
@@ -32,5 +36,10 @@ func (c *RHClient) GetInstrument(ticker string) (ins *robinhood.Instrument, err 
 
 func (c *RHClient) MakeOrder(ins *robinhood.Instrument, opts robinhood.OrderOpts) (orderOutput *robinhood.OrderOutput, err error) {
 	orderOutput, err = c.Client.Order(ins, opts)
+	return
+}
+
+func (c *RHClient) GetPositions() (positions []robinhood.Position, err error) {
+	positions, err = c.Client.GetPositions()
 	return
 }

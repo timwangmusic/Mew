@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"astuart.co/go-robinhood"
+	"github.com/coolboy/go-robinhood"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -22,6 +22,11 @@ func (c *RHClientMock) GetInstrument(ticker string) (ins *robinhood.Instrument, 
 func (c *RHClientMock) MakeOrder(ins *robinhood.Instrument, opts robinhood.OrderOpts) (orderOutput *robinhood.OrderOutput, err error) {
 	args := c.Called(ins, opts)
 	return args.Get(0).(*robinhood.OrderOutput), args.Error(1)
+}
+
+func (c *RHClientMock) GetPositions() (positions []robinhood.Position, err error) {
+	// TODO
+	return
 }
 
 var rhClientMocker = new(RHClientMock)
