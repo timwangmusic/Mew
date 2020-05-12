@@ -24,4 +24,9 @@ func (c *RHClientMock) MakeOrder(ins *robinhood.Instrument, opts robinhood.Order
 	return args.Get(0).(*robinhood.OrderOutput), args.Error(1)
 }
 
+func (c *RHClientMock) GetPositions() (positions []robinhood.Position, err error) {
+	// TODO
+	return
+}
+
 var rhClientMocker = new(RHClientMock)
