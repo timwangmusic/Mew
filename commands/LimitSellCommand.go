@@ -66,8 +66,7 @@ func (base *LimitSellCommand) Prepare() error {
 }
 
 func (base LimitSellCommand) Execute() (err error) {
-
-	if base.Ins == nil {
+	if v := reflect.ValueOf(base.Opts); v.IsZero() {
 		return errors.New("please call Prepare()")
 	}
 

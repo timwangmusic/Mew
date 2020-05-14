@@ -3,6 +3,7 @@ package commands
 import (
 	"errors"
 	"github.com/coolboy/go-robinhood"
+	log "github.com/sirupsen/logrus"
 	"github.com/weihesdlegend/Mew/clients"
 	"reflect"
 )
@@ -74,17 +75,17 @@ func (base *MarketBuyCommand) Prepare() error {
 }
 
 func (base MarketBuyCommand) Execute() error {
-	if base.Opts == (robinhood.OrderOpts{}) {
-		return errors.New("Please call Prepare()")
+	if v := reflect.ValueOf(base.Opts); v.IsZero() {
+		return errors.New("please call Prepare()")
 	}
-	// place order
-	// use ask price in quote to buy or sell
-	// time in force defaults to "good till canceled(gtc)"
-	_, orderErr := base.RhClient.MakeOrder(base.Ins, base.Opts)
+
+	orderRes, orderErr := base.RhClient.MakeOrder(base.Ins, base.Opts)
 
 	if orderErr != nil {
 		return orderErr
 	}
+
+	log.Infof("Order placed for %s ID %s", base.Ticker, orderRes.ID)
 
 	return nil
 }

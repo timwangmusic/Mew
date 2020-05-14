@@ -127,7 +127,7 @@ func InitCommands() {
 				// execution
 				err = lbCmd.Execute()
 				if err != nil {
-					log.Error(err)
+					log.Error("Execute() for ", ticker, " error : ", err)
 					continue
 				}
 			}
@@ -264,6 +264,7 @@ func InitCommands() {
 				log.Info(utils.OrderToString(msCmd.Opts, *msCmd.Ins))
 
 				if err = msCmd.Execute(); err != nil {
+					log.Error("Execute() for ", ticker, " error : ", err)
 					continue
 				}
 			}
