@@ -2,10 +2,8 @@ package commands
 
 import (
 	"errors"
-	"reflect"
-	"strings"
-
 	"github.com/weihesdlegend/Mew/utils"
+	"reflect"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/weihesdlegend/Mew/clients"
@@ -51,8 +49,7 @@ func (base *LimitBuyCommand) Prepare() error {
 		return validateErr
 	}
 
-	TICK := strings.ToUpper(base.Ticker)
-	quotes, quoteErr := base.RhClient.GetQuote(TICK)
+	quotes, quoteErr := base.RhClient.GetQuote(base.Ticker)
 	if quoteErr != nil {
 		return quoteErr
 	}
@@ -61,7 +58,7 @@ func (base *LimitBuyCommand) Prepare() error {
 		return errors.New("no quote obtained from provided security name, please check")
 	}
 
-	ins, insErr := base.RhClient.GetInstrument(TICK)
+	ins, insErr := base.RhClient.GetInstrument(base.Ticker)
 	if insErr != nil {
 		return insErr
 	}

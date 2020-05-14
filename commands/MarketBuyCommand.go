@@ -2,11 +2,9 @@ package commands
 
 import (
 	"errors"
-	"reflect"
-	"strings"
-
 	"github.com/coolboy/go-robinhood"
 	"github.com/weihesdlegend/Mew/clients"
+	"reflect"
 )
 
 // TODO comment
@@ -41,8 +39,7 @@ func (base *MarketBuyCommand) Prepare() error {
 		return validateErr
 	}
 
-	TICK := strings.ToUpper(base.Ticker)
-	quotes, quoteErr := base.RhClient.GetQuote(TICK)
+	quotes, quoteErr := base.RhClient.GetQuote(base.Ticker)
 	if quoteErr != nil {
 		return quoteErr
 	}
@@ -51,7 +48,7 @@ func (base *MarketBuyCommand) Prepare() error {
 		return errors.New("no quote obtained from provided security name, please check")
 	}
 
-	ins, insErr := base.RhClient.GetInstrument(TICK)
+	ins, insErr := base.RhClient.GetInstrument(base.Ticker)
 	if insErr != nil {
 		return insErr
 	}
