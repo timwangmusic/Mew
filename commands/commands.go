@@ -71,12 +71,17 @@ func InitCommands() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			file.Close() // release it
+
+			if err := file.Close(); err != nil {
+				return err
+			} // release it
 
 			viper.Set("broker.name", "robinhood")
 			viper.Set("broker.user", user)
 			viper.Set("broker.encodedCredentials", tkJSONb64)
-			viper.WriteConfig() // Will override
+			if err := viper.WriteConfig(); err != nil {
+				return err
+			} // Will override
 
 			return nil
 		},
@@ -92,8 +97,14 @@ func InitCommands() {
 			&limitBuyFlag,
 			&totalValueFlag,
 		},
-		Action: func(ctx *cli.Context) error {
+		Action: func(ctx *cli.Context) (err error) {
 			rhClient := clients.GetRHClient()
+
+			var tickers []string
+			tickers, err = ParseTicker(ticker)
+			if err != nil {
+				return
+			}
 
 			// init
 			lbCmd := &LimitBuyCommand{
@@ -103,22 +114,25 @@ func InitCommands() {
 				AmountLimit:  totalValue,
 			}
 
-			// Preview
-			err := lbCmd.Prepare()
-			if err != nil {
-				return err
+			for _, ticker := range tickers {
+				lbCmd.Ticker = ticker
+				// prepare and preview
+				err = lbCmd.Prepare()
+				if err != nil {
+					log.Error(err)
+					continue
+				}
+				log.Info(utils.OrderToString(lbCmd.Opts, *lbCmd.Ins))
+
+				// execution
+				err = lbCmd.Execute()
+				if err != nil {
+					log.Error(err)
+					continue
+				}
 			}
 
-			log.Info(utils.OrderToString(lbCmd.Opts, lbCmd.Ins))
-
-			// Exec
-			err = lbCmd.Execute()
-			if err != nil {
-				log.Error(err)
-				return err
-			}
-
-			return nil
+			return
 		},
 	}
 
@@ -179,7 +193,7 @@ func InitCommands() {
 			// TODO &sharesFlag,
 			&totalValueFlag,
 		},
-		Action: func(ctx *cli.Context) error {
+		Action: func(ctx *cli.Context) (err error) {
 			rhClient := clients.GetRHClient()
 			// init
 			mbCmd := &MarketBuyCommand{
@@ -188,21 +202,31 @@ func InitCommands() {
 				AmountLimit: totalValue,
 			}
 
-			// Preview
-			err := mbCmd.Prepare()
+			var tickers []string
+			tickers, err = ParseTicker(ticker)
 			if err != nil {
-				return err
-			}
-			log.Info(utils.OrderToString(mbCmd.Opts, mbCmd.Ins))
-
-			// Exec
-			err = mbCmd.Execute()
-			if err != nil {
-				log.Error(err)
-				return err
+				return
 			}
 
-			return nil
+			for _, ticker := range tickers {
+				mbCmd.Ticker = ticker
+
+				// prepare and preview
+				err = mbCmd.Prepare()
+				if err != nil {
+					log.Error(err)
+					continue
+				}
+				log.Info(utils.OrderToString(mbCmd.Opts, *mbCmd.Ins))
+
+				// execution
+				err = mbCmd.Execute()
+				if err != nil {
+					log.Error(err)
+					continue
+				}
+			}
+			return
 		},
 	}
 
