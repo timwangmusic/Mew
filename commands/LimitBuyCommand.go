@@ -21,7 +21,7 @@ type LimitBuyCommand struct {
 	AmountLimit  float64
 
 	//
-	Ins  robinhood.Instrument
+	Ins  *robinhood.Instrument
 	Opts robinhood.OrderOpts
 }
 
@@ -65,7 +65,7 @@ func (base *LimitBuyCommand) Prepare() error {
 	if insErr != nil {
 		return insErr
 	}
-	base.Ins = *ins
+	base.Ins = ins
 
 	baselinePrice := quotes[0].Price()
 	log.Infof("quoted price is %f", baselinePrice)
@@ -100,7 +100,7 @@ func (base LimitBuyCommand) Execute() error {
 	// place order
 	// use ask price in quote to buy or sell
 	// time in force defaults to "good till canceled(gtc)"
-	orderRes, orderErr := base.RhClient.MakeOrder(&base.Ins, base.Opts)
+	orderRes, orderErr := base.RhClient.MakeOrder(base.Ins, base.Opts)
 
 	if orderErr != nil {
 		return orderErr

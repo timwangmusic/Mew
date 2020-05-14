@@ -109,7 +109,7 @@ func InitCommands() {
 				return err
 			}
 
-			log.Info(utils.OrderToString(lbCmd.Opts, lbCmd.Ins))
+			log.Info(utils.OrderToString(lbCmd.Opts, *lbCmd.Ins))
 
 			// Exec
 			err = lbCmd.Execute()
@@ -193,7 +193,7 @@ func InitCommands() {
 			if err != nil {
 				return err
 			}
-			log.Info(utils.OrderToString(mbCmd.Opts, mbCmd.Ins))
+			log.Info(utils.OrderToString(mbCmd.Opts, *mbCmd.Ins))
 
 			// Exec
 			err = mbCmd.Execute()

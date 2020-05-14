@@ -15,7 +15,7 @@ type MarketBuyCommand struct {
 	Ticker      string
 	AmountLimit float64
 	//
-	Ins  robinhood.Instrument
+	Ins  *robinhood.Instrument
 	Opts robinhood.OrderOpts
 }
 
@@ -56,7 +56,7 @@ func (base *MarketBuyCommand) Prepare() error {
 		return insErr
 	}
 
-	base.Ins = *ins
+	base.Ins = ins
 	price := quotes[0].Price()
 	quantity := uint64(base.AmountLimit / price)
 
@@ -83,7 +83,7 @@ func (base MarketBuyCommand) Execute() error {
 	// place order
 	// use ask price in quote to buy or sell
 	// time in force defaults to "good till canceled(gtc)"
-	_, orderErr := base.RhClient.MakeOrder(&base.Ins, base.Opts)
+	_, orderErr := base.RhClient.MakeOrder(base.Ins, base.Opts)
 
 	if orderErr != nil {
 		return orderErr
