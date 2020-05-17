@@ -75,4 +75,40 @@ time="2020-05-17T00:43:38-07:00" level=info msg="Order placed with order ID 37b4
 ```
 ### Sell
 #### Market
+```
+Y:\Projects\Mew>mew s -t QQQ -v 300
+time="2020-05-17T00:44:55-07:00" level=info msg="welcome to use the Mew stock assistant"
+time="2020-05-17T00:44:55-07:00" level=info msg="Creating rhClient..."
+time="2020-05-17T00:44:55-07:00" level=info msg="Loading config..."
+Please confirm the order details.
+Order type: Market Sell Security: QQQ   Quantity: 1     price: 222.74 [y/n]y
+time="2020-05-17T00:44:59-07:00" level=info msg="About to place Market Sell for 1 shares of QQQ at $222.74"
+time="2020-05-17T00:44:59-07:00" level=info msg="Order placed for QQQ ID 008e41b7-a1bf-47a0-97d7-96f8be3f7621"
+```
 #### Limit
+```
+Y:\Projects\Mew>mew ls -t QQQ -v 300 -ls 101.5
+time="2020-05-17T00:45:32-07:00" level=info msg="welcome to use the Mew stock assistant"
+time="2020-05-17T00:45:32-07:00" level=info msg="Creating rhClient..."
+time="2020-05-17T00:45:32-07:00" level=info msg="Loading config..."
+Please confirm the order details.
+Order type: Limit Sell  Security: QQQ   Quantity: 1     price: 226.08 [y/n]y
+time="2020-05-17T00:45:34-07:00" level=info msg="About to place Limit Sell for 1 shares of QQQ at $226.08"
+time="2020-05-17T00:45:34-07:00" level=info msg="Order placed for QQQ ID f9d279ed-146e-4a5e-868b-e90272158461"
+```
+#### Batch
+```
+Y:\Projects\Mew>mew ls -t @QQQ_MSFT -v 300 -ls 101.5
+time="2020-05-17T00:47:12-07:00" level=info msg="welcome to use the Mew stock assistant"
+time="2020-05-17T00:47:12-07:00" level=info msg="Creating rhClient..."
+time="2020-05-17T00:47:12-07:00" level=info msg="Loading config..."
+Please confirm the order details.
+Order type: Limit Sell  Security: QQQ   Quantity: 1     price: 226.08 [y/n]y
+time="2020-05-17T00:47:17-07:00" level=info msg="About to place Limit Sell for 1 shares of QQQ at $226.08"
+time="2020-05-17T00:47:17-07:00" level=info msg="Order placed for QQQ ID 58cda674-7b7b-48f9-bc11-258808f41b43"
+Please confirm the order details.
+Order type: Limit Sell  Security: MSFT  Quantity: 1     price: 185.19 [y/n]y
+time="2020-05-17T00:47:20-07:00" level=info msg="About to place Limit Sell for 1 shares of MSFT at $185.19"
+time="2020-05-17T00:47:20-07:00" level=error msg="Execute() for MSFT error : Error returned from API: detail: \"Not enough shares to sell.\""
+time="2020-05-17T00:47:20-07:00" level=fatal msg="Error returned from API: detail: \"Not enough shares to sell.\""
+```
