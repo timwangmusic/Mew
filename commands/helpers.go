@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/coolboy/go-robinhood"
+	log "github.com/sirupsen/logrus"
 	"github.com/weihesdlegend/Mew/clients"
 	"github.com/weihesdlegend/Mew/utils"
 )
@@ -33,9 +34,7 @@ func previewHelper(ticker string, transactionType robinhood.OrderType, side robi
 	// wait for user confirmation
 	for {
 		text, _ := BufferReader.ReadString('\n')
-		text = strings.Replace(text, "\n", "", -1)
-		text = strings.ToLower(text)
-		if text == "y" {
+		if strings.Contains(text, "y") {
 			break
 		} else {
 			return errors.New("order is cancelled")
@@ -86,10 +85,15 @@ func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64,
 		return
 	}
 	price := quotes[0].Price()
+	log.Infof("order price is %f", price)
+
 	price, roundErr := utils.Round(price*PercentLimit/100.0, 0.01) // limit to floating point 2 digits
 	if err = roundErr; err != nil {
 		return
 	}
+
+	log.Infof("updated price is %f", price)
+
 	quantity := uint64(AmountLimit / price)
 	Opts = robinhood.OrderOpts{
 		Quantity:      quantity,
