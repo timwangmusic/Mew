@@ -32,42 +32,23 @@ func (base MarketBuyCommand) Validate() error {
 }
 
 // Write, update internal fields
-// TODO should it be stateless?
 func (base *MarketBuyCommand) Prepare() error {
+	var err error
 
-	validateErr := base.Validate()
-	if validateErr != nil {
-		return validateErr
+	err = base.Validate()
+	if err != nil {
+		return err
 	}
 
-	quotes, quoteErr := base.RhClient.GetQuote(base.Ticker)
-	if quoteErr != nil {
-		return quoteErr
+	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, 100.0, base.RhClient)
+	if err != nil {
+		return err
 	}
 
-	if len(quotes) == 0 {
-		return errors.New("no quote obtained from provided security name, please check")
-	}
+	base.Opts.Side = robinhood.Buy
+	base.Opts.Type = robinhood.Market
 
-	ins, insErr := base.RhClient.GetInstrument(base.Ticker)
-	if insErr != nil {
-		return insErr
-	}
-
-	base.Ins = ins
-	price := quotes[0].Price()
-	quantity := uint64(base.AmountLimit / price)
-
-	base.Opts = robinhood.OrderOpts{
-		Type:          robinhood.Market,
-		Quantity:      quantity,
-		Side:          robinhood.Buy,
-		Price:         price,
-		ExtendedHours: true,          // default to allow after hour
-		TimeInForce:   robinhood.GFD, // default to GoodForDay
-	}
-
-	if err := previewHelper(base.Ticker, base.Opts.Type, base.Opts.Side, base.Opts.Quantity, base.Opts.Price); err != nil {
+	if err = previewHelper(base.Ticker, base.Opts.Type, base.Opts.Side, base.Opts.Quantity, base.Opts.Price); err != nil {
 		return err
 	}
 

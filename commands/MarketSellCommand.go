@@ -38,12 +38,13 @@ func (base MarketSellCommand) Validate() error {
 
 // Write, update internal fields
 func (base *MarketSellCommand) Prepare() error {
-	validateErr := base.Validate()
-	if validateErr != nil {
-		return validateErr
+	var err error
+
+	err = base.Validate()
+	if err != nil {
+		return err
 	}
 
-	var err error
 	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, 100.0, base.RhClient)
 	if err != nil {
 		return err
