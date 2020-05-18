@@ -44,12 +44,13 @@ func (base LimitSellCommand) Validate() error {
 
 // Write, update internal fields
 func (base *LimitSellCommand) Prepare() error {
-	validateErr := base.Validate()
-	if validateErr != nil {
-		return validateErr
+	var err error
+
+	err = base.Validate()
+	if err != nil {
+		return err
 	}
 
-	var err error
 	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, base.PercentLimit, base.RhClient)
 	if err != nil {
 		return err

@@ -2,7 +2,6 @@ package commands
 
 import (
 	"errors"
-	"github.com/weihesdlegend/Mew/utils"
 	"reflect"
 
 	log "github.com/sirupsen/logrus"
@@ -41,49 +40,23 @@ func (base LimitBuyCommand) Validate() error {
 }
 
 // Write, update internal fields
-// TODO should it be stateless?
 func (base *LimitBuyCommand) Prepare() error {
+	var err error
 
-	validateErr := base.Validate()
-	if validateErr != nil {
-		return validateErr
+	err = base.Validate()
+	if err != nil {
+		return err
 	}
 
-	quotes, quoteErr := base.RhClient.GetQuote(base.Ticker)
-	if quoteErr != nil {
-		return quoteErr
+	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, base.PercentLimit, base.RhClient)
+	if err != nil {
+		return err
 	}
 
-	if len(quotes) == 0 {
-		return errors.New("no quote obtained from provided security name, please check")
-	}
+	base.Opts.Side = robinhood.Buy
+	base.Opts.Type = robinhood.Limit
 
-	ins, insErr := base.RhClient.GetInstrument(base.Ticker)
-	if insErr != nil {
-		return insErr
-	}
-	base.Ins = ins
-
-	baselinePrice := quotes[0].Price()
-	log.Infof("quoted price is %f", baselinePrice)
-	limitPrice, roundErr := utils.Round(baselinePrice*base.PercentLimit/100.0, 0.01) // limit to floating point 2 digits
-	if roundErr != nil {
-		return roundErr
-	}
-	log.Infof("limit price is %f", limitPrice)
-	quantity := uint64(base.AmountLimit / limitPrice)
-
-	base.Opts = robinhood.OrderOpts{
-		Type:     robinhood.Limit,
-		Quantity: quantity,
-		Side:     robinhood.Buy,
-		Price:    limitPrice,
-		// TODO, make it into config? or env_var
-		ExtendedHours: true,          // default to allow after hour
-		TimeInForce:   robinhood.GFD, // default to GoodForDay
-	}
-
-	if err := previewHelper(base.Ticker, base.Opts.Type, base.Opts.Side, base.Opts.Quantity, base.Opts.Price); err != nil {
+	if err = previewHelper(base.Ticker, base.Opts.Type, base.Opts.Side, base.Opts.Quantity, base.Opts.Price); err != nil {
 		return err
 	}
 
