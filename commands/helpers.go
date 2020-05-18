@@ -34,8 +34,7 @@ func previewHelper(ticker string, transactionType robinhood.OrderType, side robi
 	// wait for user confirmation
 	for {
 		text, _ := BufferReader.ReadString('\n')
-		matched, _ := regexp.MatchString(`^y$`, text)
-		if matched {
+		if strings.Contains(text, "y") {
 			break
 		} else {
 			return errors.New("order is cancelled")
@@ -86,7 +85,7 @@ func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64,
 		return
 	}
 	price := quotes[0].Price()
-	log.Infof("quoted price is %f", price)
+	log.Infof("order price is %f", price)
 
 	price, roundErr := utils.Round(price*PercentLimit/100.0, 0.01) // limit to floating point 2 digits
 	if err = roundErr; err != nil {
