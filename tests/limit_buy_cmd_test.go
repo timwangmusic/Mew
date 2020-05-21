@@ -54,7 +54,7 @@ func TestLimitBuyCommand(t *testing.T) {
 		t.Errorf("expected quantity to be %d, got %d", expectedQuantity, limitBuyCommand.Opts.Quantity)
 	}
 
-	rhClientMocker.On("MakeOrder", mock.Anything, mock.Anything).Return(&robinhood.OrderOutput{ID: "33521"}, nil)
+	rhClientMocker.On("Order", mock.Anything, mock.Anything).Return(&robinhood.OrderOutput{ID: "33521"}, nil)
 
 	if err := limitBuyCommand.Execute(); err != nil {
 		t.Fatal(err)

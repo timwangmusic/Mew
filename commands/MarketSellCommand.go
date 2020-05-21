@@ -65,7 +65,7 @@ func (base MarketSellCommand) Execute() error {
 		return errors.New("please call Prepare()")
 	}
 
-	orderRes, orderErr := base.RhClient.MakeOrder(base.Ins, base.Opts)
+	orderRes, orderErr := base.RhClient.Order(base.Ins, base.Opts)
 
 	if orderErr != nil {
 		return orderErr
