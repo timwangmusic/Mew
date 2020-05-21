@@ -2,17 +2,9 @@ package commands
 
 import (
 	"bufio"
-	"encoding/base64"
-	"encoding/json"
 	"os"
 
-	"github.com/weihesdlegend/Mew/utils"
-
-	"github.com/coolboy/go-robinhood"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
-	"github.com/weihesdlegend/Mew/clients"
 )
 
 // supported commands
@@ -20,7 +12,7 @@ var MarketBuyCmd cli.Command
 var MarketSellCmd cli.Command
 var LimitBuyCmd cli.Command
 var LimitSellCmd cli.Command
-var AuthCmd cli.Command // auth command
+var AuthCmd cli.Command
 
 var BufferReader *bufio.Reader
 
@@ -35,56 +27,7 @@ func InitCommands() {
 			&passwordFlag,
 			&mfaFlag,
 		},
-		Action: func(ctx *cli.Context) error {
-			// TODO move to AuthCommand.go
-			log.Info("Creating config file for ", user)
-			// Create new config from usr/pwd/mfa
-			ts := &robinhood.OAuth{
-				Username: user,
-				Password: password,
-				MFA:      mfa, // Optional
-			}
-
-			tk, err := ts.Token()
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			if tk.AccessToken == "" {
-				// For some reason the library doesn't return err when password is wrong
-				log.Fatal("Auth failed, check your user/password etc...")
-			}
-
-			tkJSON, err := json.Marshal(tk)
-			tkJSONb64 := base64.StdEncoding.EncodeToString(tkJSON)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			// .\config.yml
-			viper.SetConfigName("config") // name of config file (without extension)
-			viper.SetConfigType("yaml")   // REQUIRED if the config file does not have the extension in the name
-			viper.AddConfigPath(".")      // optionally look for config in the working directory
-
-			// create empty file if not exist
-			file, err := os.OpenFile("./config.yml", os.O_RDONLY|os.O_CREATE, 0666)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			if err := file.Close(); err != nil {
-				return err
-			} // release it
-
-			viper.Set("broker.name", "robinhood")
-			viper.Set("broker.user", user)
-			viper.Set("broker.encodedCredentials", tkJSONb64)
-			if err := viper.WriteConfig(); err != nil {
-				return err
-			} // Will override
-
-			return nil
-		},
+		Action: AuthCallback,
 	}
 
 	LimitBuyCmd = cli.Command{
@@ -97,43 +40,7 @@ func InitCommands() {
 			&limitBuyFlag,
 			&totalValueFlag,
 		},
-		Action: func(ctx *cli.Context) (err error) {
-			rhClient := clients.GetRHClient()
-
-			var tickers []string
-			tickers, err = ParseTicker(ticker)
-			if err != nil {
-				return
-			}
-
-			// init
-			lbCmd := &LimitBuyCommand{
-				RhClient:     rhClient,
-				Ticker:       ticker,
-				PercentLimit: limit,
-				AmountLimit:  totalValue,
-			}
-
-			for _, ticker := range tickers {
-				lbCmd.Ticker = ticker
-				// prepare and preview
-				err = lbCmd.Prepare()
-				if err != nil {
-					log.Error(err)
-					continue
-				}
-				log.Info(utils.OrderToString(lbCmd.Opts, *lbCmd.Ins))
-
-				// execution
-				err = lbCmd.Execute()
-				if err != nil {
-					log.Error("Execute() for ", ticker, " error : ", err)
-					continue
-				}
-			}
-
-			return
-		},
+		Action: LimitBuyCallback,
 	}
 
 	// TODO -ls needs to be updated
@@ -148,40 +55,7 @@ func InitCommands() {
 			&totalValueFlag,
 			&percentToSellFlag,
 		},
-		Action: func(ctx *cli.Context) (err error) {
-			rhClient := clients.GetRHClient()
-
-			tickers, tickerParseErr := ParseTicker(ticker)
-			if tickerParseErr != nil {
-				err = tickerParseErr
-				return
-			}
-
-			for _, ticker := range tickers {
-				// init
-				lsCmd := &LimitSellCommand{
-					RhClient:     rhClient,
-					Ticker:       ticker,
-					AmountLimit:  totalValue,
-					PercentLimit: limitSell,
-				}
-				// preview
-				if err = lsCmd.Prepare(); err != nil {
-					log.Error("Prepare() for ", ticker, " error : ", err)
-					continue
-				}
-
-				log.Info(utils.OrderToString(lsCmd.Opts, *lsCmd.Ins))
-
-				if err = lsCmd.Execute(); err != nil {
-					log.Error("Execute() for ", ticker, " error : ", err)
-
-					continue
-				}
-			}
-
-			return
-		},
+		Action: LimitSellCallback,
 	}
 
 	MarketBuyCmd = cli.Command{
@@ -193,41 +67,7 @@ func InitCommands() {
 			// TODO &sharesFlag,
 			&totalValueFlag,
 		},
-		Action: func(ctx *cli.Context) (err error) {
-			rhClient := clients.GetRHClient()
-			// init
-			mbCmd := &MarketBuyCommand{
-				RhClient:    rhClient,
-				Ticker:      ticker,
-				AmountLimit: totalValue,
-			}
-
-			var tickers []string
-			tickers, err = ParseTicker(ticker)
-			if err != nil {
-				return
-			}
-
-			for _, ticker := range tickers {
-				mbCmd.Ticker = ticker
-
-				// prepare and preview
-				err = mbCmd.Prepare()
-				if err != nil {
-					log.Error(err)
-					continue
-				}
-				log.Info(utils.OrderToString(mbCmd.Opts, *mbCmd.Ins))
-
-				// execution
-				err = mbCmd.Execute()
-				if err != nil {
-					log.Error(err)
-					continue
-				}
-			}
-			return
-		},
+		Action: MarketBuyCallback,
 	}
 
 	MarketSellCmd = cli.Command{
@@ -240,36 +80,6 @@ func InitCommands() {
 			&totalValueFlag,
 			&percentToSellFlag,
 		},
-		Action: func(ctx *cli.Context) (err error) {
-			rhClient := clients.GetRHClient()
-
-			tickers, tickerParseErr := ParseTicker(ticker)
-			if tickerParseErr != nil {
-				err = tickerParseErr
-				return
-			}
-
-			for _, ticker := range tickers {
-				// init
-				msCmd := &MarketSellCommand{
-					RhClient:    rhClient,
-					Ticker:      ticker,
-					AmountLimit: totalValue,
-				}
-				// preview
-				if err = msCmd.Prepare(); err != nil {
-					continue
-				}
-
-				log.Info(utils.OrderToString(msCmd.Opts, *msCmd.Ins))
-
-				if err = msCmd.Execute(); err != nil {
-					log.Error("Execute() for ", ticker, " error : ", err)
-					continue
-				}
-			}
-
-			return
-		},
+		Action: MarketSellCallback,
 	}
 }

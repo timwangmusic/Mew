@@ -5,8 +5,12 @@ import (
 	"reflect"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
+
 	"github.com/coolboy/go-robinhood"
 	"github.com/weihesdlegend/Mew/clients"
+	"github.com/weihesdlegend/Mew/utils"
 )
 
 // TODO comment
@@ -61,4 +65,36 @@ func (base *MarketSellCommand) Prepare() error {
 
 func (base MarketSellCommand) Execute() error {
 	return ExecuteOrder(base.Opts, base.Ins, base.RhClient)
+}
+
+func MarketSellCallback(ctx *cli.Context) (err error) {
+	rhClient := clients.GetRHClient()
+
+	tickers, tickerParseErr := ParseTicker(ticker)
+	if tickerParseErr != nil {
+		err = tickerParseErr
+		return
+	}
+
+	for _, ticker := range tickers {
+		// init
+		msCmd := &MarketSellCommand{
+			RhClient:    rhClient,
+			Ticker:      ticker,
+			AmountLimit: totalValue,
+		}
+		// preview
+		if err = msCmd.Prepare(); err != nil {
+			continue
+		}
+
+		log.Info(utils.OrderToString(msCmd.Opts, *msCmd.Ins))
+
+		if err = msCmd.Execute(); err != nil {
+			log.Error("Execute() for ", ticker, " error : ", err)
+			continue
+		}
+	}
+
+	return
 }

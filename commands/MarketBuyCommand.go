@@ -2,9 +2,13 @@ package commands
 
 import (
 	"errors"
-	"github.com/coolboy/go-robinhood"
-	"github.com/weihesdlegend/Mew/clients"
 	"reflect"
+
+	"github.com/coolboy/go-robinhood"
+	log "github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
+	"github.com/weihesdlegend/Mew/clients"
+	"github.com/weihesdlegend/Mew/utils"
 )
 
 // TODO comment
@@ -56,4 +60,40 @@ func (base *MarketBuyCommand) Prepare() error {
 
 func (base MarketBuyCommand) Execute() error {
 	return ExecuteOrder(base.Opts, base.Ins, base.RhClient)
+}
+
+func MarketBuyCallback(ctx *cli.Context) (err error) {
+	rhClient := clients.GetRHClient()
+	// init
+	mbCmd := &MarketBuyCommand{
+		RhClient:    rhClient,
+		Ticker:      ticker,
+		AmountLimit: totalValue,
+	}
+
+	var tickers []string
+	tickers, err = ParseTicker(ticker)
+	if err != nil {
+		return
+	}
+
+	for _, ticker := range tickers {
+		mbCmd.Ticker = ticker
+
+		// prepare and preview
+		err = mbCmd.Prepare()
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		log.Info(utils.OrderToString(mbCmd.Opts, *mbCmd.Ins))
+
+		// execution
+		err = mbCmd.Execute()
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+	}
+	return
 }

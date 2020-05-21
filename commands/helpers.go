@@ -85,14 +85,14 @@ func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64,
 		return
 	}
 	price := quotes[0].Price()
-	log.Infof("order price is %f", price)
+	log.Infof("Quote price is %f", price)
 
 	price, roundErr := utils.Round(price*PercentLimit/100.0, 0.01) // limit to floating point 2 digits
 	if err = roundErr; err != nil {
 		return
 	}
 
-	log.Infof("updated price is %f", price)
+	log.Infof("Updated price is %f", price)
 
 	quantity := uint64(AmountLimit / price)
 	Opts = robinhood.OrderOpts{

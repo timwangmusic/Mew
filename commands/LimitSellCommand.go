@@ -6,7 +6,10 @@ import (
 	"strings"
 
 	"github.com/coolboy/go-robinhood"
+	log "github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
 	"github.com/weihesdlegend/Mew/clients"
+	"github.com/weihesdlegend/Mew/utils"
 )
 
 // TODO comment
@@ -67,4 +70,39 @@ func (base *LimitSellCommand) Prepare() error {
 
 func (base LimitSellCommand) Execute() (err error) {
 	return ExecuteOrder(base.Opts, base.Ins, base.RhClient)
+}
+
+func LimitSellCallback(ctx *cli.Context) (err error) {
+	rhClient := clients.GetRHClient()
+
+	tickers, tickerParseErr := ParseTicker(ticker)
+	if tickerParseErr != nil {
+		err = tickerParseErr
+		return
+	}
+
+	for _, ticker := range tickers {
+		// init
+		lsCmd := &LimitSellCommand{
+			RhClient:     rhClient,
+			Ticker:       ticker,
+			AmountLimit:  totalValue,
+			PercentLimit: limitSell,
+		}
+		// preview
+		if err = lsCmd.Prepare(); err != nil {
+			log.Error("Prepare() for ", ticker, " error : ", err)
+			continue
+		}
+
+		log.Info(utils.OrderToString(lsCmd.Opts, *lsCmd.Ins))
+
+		if err = lsCmd.Execute(); err != nil {
+			log.Error("Execute() for ", ticker, " error : ", err)
+
+			continue
+		}
+	}
+
+	return
 }
