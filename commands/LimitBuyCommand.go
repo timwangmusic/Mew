@@ -4,7 +4,10 @@ import (
 	"errors"
 	"reflect"
 
+	log "github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
 	"github.com/weihesdlegend/Mew/clients"
+	"github.com/weihesdlegend/Mew/utils"
 
 	"github.com/coolboy/go-robinhood"
 )
@@ -64,4 +67,44 @@ func (base *LimitBuyCommand) Prepare() error {
 
 func (base LimitBuyCommand) Execute() error {
 	return ExecuteOrder(base.Opts, base.Ins, base.RhClient)
+}
+
+// TODO Should we consolidate LimitBuyCallback && LimitSellCallback?
+// LimitBuyCallback to refactor the code
+func LimitBuyCallback(ctx *cli.Context) (err error) {
+	rhClient := clients.GetRHClient()
+
+	var tickers []string
+	tickers, err = ParseTicker(ticker)
+	if err != nil {
+		return
+	}
+
+	// init
+	lbCmd := &LimitBuyCommand{
+		RhClient:     rhClient,
+		Ticker:       ticker,
+		PercentLimit: limit,
+		AmountLimit:  totalValue,
+	}
+
+	for _, ticker := range tickers {
+		lbCmd.Ticker = ticker
+		// prepare and preview
+		err = lbCmd.Prepare()
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		log.Info(utils.OrderToString(lbCmd.Opts, *lbCmd.Ins))
+
+		// execution
+		err = lbCmd.Execute()
+		if err != nil {
+			log.Error("Execute() for ", ticker, " error : ", err)
+			continue
+		}
+	}
+
+	return
 }
