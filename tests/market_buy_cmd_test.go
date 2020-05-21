@@ -32,7 +32,7 @@ func TestMarketBuyCommand(t *testing.T) {
 		t.Errorf("expected quantity to be %d, got %d", expectedQuantity, marketBuyCommand.Opts.Quantity)
 	}
 
-	rhClientMocker.On("MakeOrder", mock.Anything, mock.Anything).Return(&robinhood.OrderOutput{ID: "33523"}, nil)
+	rhClientMocker.On("Order", mock.Anything, mock.Anything).Return(&robinhood.OrderOutput{ID: "33523"}, nil)
 	if err := marketBuyCommand.Execute(); err != nil {
 		t.Error(err)
 	}

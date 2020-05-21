@@ -46,7 +46,7 @@ func TestLimitSellCommand(t *testing.T) {
 		t.Errorf("expect type to be market, got %d", limitSellCommand.Opts.Type)
 	}
 
-	rhClientMocker.On("MakeOrder", mock.Anything, mock.Anything).Return(&robinhood.OrderOutput{ID: "33522"}, nil)
+	rhClientMocker.On("Order", mock.Anything, mock.Anything).Return(&robinhood.OrderOutput{ID: "33522"}, nil)
 
 	if err := limitSellCommand.Execute(); err != nil {
 		t.Error(err)

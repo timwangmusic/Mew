@@ -4,7 +4,6 @@ import (
 	"errors"
 	"reflect"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/weihesdlegend/Mew/clients"
 
 	"github.com/coolboy/go-robinhood"
@@ -63,19 +62,6 @@ func (base *LimitBuyCommand) Prepare() error {
 	return nil
 }
 
-// TODO: consolidate execute across commands
 func (base LimitBuyCommand) Execute() error {
-	if v := reflect.ValueOf(base.Opts); v.IsZero() {
-		return errors.New("please call Prepare()")
-	}
-
-	orderRes, orderErr := base.RhClient.MakeOrder(base.Ins, base.Opts)
-
-	if orderErr != nil {
-		return orderErr
-	}
-
-	log.Infof("Order placed with order ID %s", orderRes.ID)
-
-	return nil
+	return ExecuteOrder(base.Opts, base.Ins, base.RhClient)
 }

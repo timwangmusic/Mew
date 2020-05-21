@@ -104,3 +104,24 @@ func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64,
 
 	return
 }
+
+// execute order after obtaining options and instrument details
+func ExecuteOrder(opts robinhood.OrderOpts, instrument *robinhood.Instrument, client clients.Client) error {
+	if v := reflect.ValueOf(opts); v.IsZero() {
+		return errors.New("option is empty, please call Prepare()")
+	}
+
+	if reflect.ValueOf(client).IsNil() {
+		return errors.New("invalid client")
+	}
+
+	orderRes, orderErr := client.Order(instrument, opts)
+
+	if orderErr != nil {
+		return orderErr
+	}
+
+	log.Infof("Order placed for %s with order ID: %s", instrument.Symbol, orderRes.ID)
+
+	return nil
+}

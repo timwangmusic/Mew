@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/coolboy/go-robinhood"
-	log "github.com/sirupsen/logrus"
 	"github.com/weihesdlegend/Mew/clients"
 )
 
@@ -67,17 +66,5 @@ func (base *LimitSellCommand) Prepare() error {
 }
 
 func (base LimitSellCommand) Execute() (err error) {
-	if v := reflect.ValueOf(base.Opts); v.IsZero() {
-		return errors.New("please call Prepare()")
-	}
-
-	orderRes, orderErr := base.RhClient.MakeOrder(base.Ins, base.Opts)
-
-	if orderErr != nil {
-		return orderErr
-	}
-
-	log.Infof("Order placed for %s ID %s", base.Ticker, orderRes.ID)
-
-	return nil
+	return ExecuteOrder(base.Opts, base.Ins, base.RhClient)
 }

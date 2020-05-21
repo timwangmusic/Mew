@@ -19,7 +19,7 @@ func (c *RHClientMock) GetInstrument(ticker string) (ins *robinhood.Instrument, 
 	return args.Get(0).(*robinhood.Instrument), args.Error(1)
 }
 
-func (c *RHClientMock) MakeOrder(ins *robinhood.Instrument, opts robinhood.OrderOpts) (orderOutput *robinhood.OrderOutput, err error) {
+func (c *RHClientMock) Order(ins *robinhood.Instrument, opts robinhood.OrderOpts) (orderOutput *robinhood.OrderOutput, err error) {
 	args := c.Called(ins, opts)
 	return args.Get(0).(*robinhood.OrderOutput), args.Error(1)
 }
