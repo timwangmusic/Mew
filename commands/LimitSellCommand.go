@@ -18,6 +18,7 @@ type LimitSellCommand struct {
 	Ticker       string
 	PercentLimit float64
 	AmountLimit  float64
+	SellPercent  float64
 	//
 	Ins  *robinhood.Instrument
 	Opts robinhood.OrderOpts
@@ -41,6 +42,10 @@ func (base LimitSellCommand) Validate() error {
 		return errors.New("ticker cannot be empty")
 	}
 
+	// validate and correct percentage sell flag value
+	if base.SellPercent < 0 || base.SellPercent > 100.0 {
+		base.SellPercent = 0
+	}
 	return nil
 }
 
@@ -53,7 +58,7 @@ func (base *LimitSellCommand) Prepare() error {
 		return err
 	}
 
-	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, base.PercentLimit, base.RhClient)
+	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, base.PercentLimit, base.SellPercent, base.RhClient)
 	if err != nil {
 		return err
 	}
@@ -88,6 +93,7 @@ func LimitSellCallback(ctx *cli.Context) (err error) {
 			Ticker:       ticker,
 			AmountLimit:  totalValue,
 			PercentLimit: limitSell,
+			SellPercent:  sellPercent,
 		}
 		// preview
 		if err = lsCmd.Prepare(); err != nil {

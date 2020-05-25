@@ -3,6 +3,7 @@ package commands
 import (
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"regexp"
 	"strings"
@@ -70,7 +71,7 @@ func ParseTicker(ticker string) ([]string, error) {
 
 // make http calls to RH to get instrument data and current security pricing
 // generate order options
-func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64, rhClient clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
+func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64, SellPercent float64, rhClient clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
 	Ins, insErr := rhClient.GetInstrument(ticker)
 	if err = insErr; err != nil {
 		return
@@ -95,6 +96,22 @@ func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64,
 	log.Infof("Updated price is %f", price)
 
 	quantity := uint64(AmountLimit / price)
+	if SellPercent > 0 {
+		getPositionsCmd, getPositionsCmdErr := GetPositions(rhClient)
+		if getPositionsCmdErr != nil {
+			err = getPositionsCmdErr
+			return
+		}
+
+		if _, exist := getPositionsCmd.PositionsMap[ticker]; !exist {
+			err = fmt.Errorf("not holding any security for the specified ticker: %s", ticker)
+			return
+		}
+		currentPosition := getPositionsCmd.PositionsMap[ticker]
+		// at least sell 1 share in percentage sell mode
+		quantity = uint64(math.Max(SellPercent * currentPosition.Quantity / 100, 1.0))
+	}
+
 	Opts = robinhood.OrderOpts{
 		Quantity:      quantity,
 		Price:         price,

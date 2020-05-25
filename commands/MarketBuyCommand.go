@@ -43,7 +43,7 @@ func (base *MarketBuyCommand) Prepare() error {
 		return err
 	}
 
-	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, 100.0, base.RhClient)
+	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, 100.0, 0, base.RhClient)
 	if err != nil {
 		return err
 	}
