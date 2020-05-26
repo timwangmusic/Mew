@@ -87,7 +87,7 @@ func MarketSellCallback(ctx *cli.Context) (err error) {
 			RhClient:    rhClient,
 			Ticker:      ticker,
 			AmountLimit: totalValue,
-			PercentSell: sellPercent,
+			PercentSell: percent,
 		}
 		// preview
 		if err = msCmd.Prepare(); err != nil {

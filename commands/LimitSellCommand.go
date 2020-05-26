@@ -92,7 +92,7 @@ func LimitSellCallback(ctx *cli.Context) (err error) {
 			Ticker:       ticker,
 			AmountLimit:  totalValue,
 			PercentLimit: limitSell,
-			PercentSell:  sellPercent,
+			PercentSell:  percent,
 		}
 		// preview
 		if err = lsCmd.Prepare(); err != nil {

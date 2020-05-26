@@ -8,7 +8,7 @@ var shares uint64
 var limit float64
 var limitSell float64
 var totalValue float64
-var sellPercent float64
+var percent float64
 
 // flag destination for auth
 var user string
@@ -95,6 +95,6 @@ func init() {
 		Aliases:     []string{"ps"},
 		Required:    false,
 		Value:       0,
-		Destination: &sellPercent,
+		Destination: &percent,
 	}
 }
