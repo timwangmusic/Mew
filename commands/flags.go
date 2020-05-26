@@ -94,7 +94,7 @@ func init() {
 		Name:        "percentToSell",
 		Aliases:     []string{"ps"},
 		Required:    false,
-		Value:       10.0,
+		Value:       0,
 		Destination: &sellPercent,
 	}
 }

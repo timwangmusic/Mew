@@ -49,7 +49,7 @@ func (base AuthCommand) Execute() error {
 
 	if tk.AccessToken == "" {
 		// For some reason the library doesn't return err when password is wrong
-		errors.New("Auth failed, check your user/password etc...")
+		return errors.New("auth failed, check your user, password, etc")
 	}
 
 	tkJSON, err := json.Marshal(tk)

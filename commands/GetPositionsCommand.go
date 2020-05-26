@@ -11,7 +11,6 @@ import (
 
 type GetPositionsCommand struct {
 	RhClient  clients.Client
-	Positions []Position
 	PositionsMap map[string]Position
 }
 
@@ -27,40 +26,40 @@ func (cmd *GetPositionsCommand) Prepare() error {
 }
 
 func (cmd *GetPositionsCommand) Execute() error {
-	positions, err := cmd.RhClient.GetPositions()
+	rawPositions, err := cmd.RhClient.GetPositions()
 	if err != nil {
 		return err
 	}
 
-	cmd.Positions = make([]Position, len(positions))
+	positions := make([]Position, len(rawPositions))
 	cmd.PositionsMap = make(map[string]Position)
 
 	wg := sync.WaitGroup{}
-	wg.Add(len(positions))
+	wg.Add(len(rawPositions))
 	// concurrently get details for each position
-	for idx, p := range positions {
-		go getPosition(&wg, cmd.Positions, idx, p, cmd.RhClient)
+	for idx, p := range rawPositions {
+		go getPosition(&wg, positions, idx, p, cmd.RhClient)
 	}
 	wg.Wait()
 
-	for _, p := range cmd.Positions {
-		if len(p.Ticker) > 0 && p.Quantity > 0 {
-			cmd.PositionsMap[p.Ticker] = p
-			log.Debugf("ticker: %s, quote price: %.2f, quantity: %.2f", p.Ticker, p.QuotePrice, p.Quantity)
+	for _, position := range positions {
+		if len(position.Ticker) > 0 && position.Quantity > 0 {
+			cmd.PositionsMap[position.Ticker] = position
+			log.Debugf("ticker: %s, quote price: %.2f, quantity: %.2f", position.Ticker, position.QuotePrice, position.Quantity)
 		}
 	}
 	return nil
 }
 
 // private method
-func getPosition(wg *sync.WaitGroup, positions []Position, idx int, p robinhood.Position, client clients.Client) {
+func getPosition(wg *sync.WaitGroup, positions []Position, idx int, position robinhood.Position, client clients.Client) {
 	defer wg.Done()
 
 	var newPosition Position
-	newPosition.AverageBuyPrice = p.AverageBuyPrice
-	newPosition.Quantity = p.Quantity
+	newPosition.AverageBuyPrice = position.AverageBuyPrice
+	newPosition.Quantity = position.Quantity
 
-	ins, insErr := client.GetInstrumentByURL(p.Instrument)
+	ins, insErr := client.GetInstrumentByURL(position.Instrument)
 	if insErr != nil {
 		log.Error(insErr)
 		return

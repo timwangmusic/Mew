@@ -1,6 +1,8 @@
 package tests
 
 import (
+	"errors"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/coolboy/go-robinhood"
@@ -24,10 +26,12 @@ func TestLimitSellCommand(t *testing.T) {
 
 	if err := limitSellCommand.Validate(); err != nil {
 		t.Error(err)
+		return
 	}
 	lastPrice := 100.0
 	if err := limitSellCommand.Prepare(); err != nil {
 		t.Error(err)
+		return
 	}
 
 	expectedLimitPrice := 101.00
@@ -44,6 +48,10 @@ func TestLimitSellCommand(t *testing.T) {
 	}
 	if limitSellCommand.Opts.Type != robinhood.Limit {
 		t.Errorf("expect type to be market, got %d", limitSellCommand.Opts.Type)
+	}
+	if limitSellCommand.PercentSell != 0.0 {
+		t.Errorf("expect sell percent to be 0.0, got %.2f", limitSellCommand.PercentSell)
+		return
 	}
 
 	rhClientMocker.On("Order", mock.Anything, mock.Anything).Return(&robinhood.OrderOutput{ID: "33522"}, nil)
@@ -62,14 +70,16 @@ func TestLimitPercentageSell(t *testing.T) {
 	setupMocker(tickers)
 	setupAdditionalMockerValues(tickers)
 
-	limitSellCommand.SellPercent = 50.0
+	limitSellCommand.PercentSell = 50.0
 
 	if err := limitSellCommand.Validate(); err != nil {
 		t.Error(err)
+		return
 	}
 	lastPrice := 100.0
 	if err := limitSellCommand.Prepare(); err != nil {
 		t.Error(err)
+		return
 	}
 
 	expectedLimitPrice := 101.00
@@ -95,4 +105,20 @@ func TestLimitPercentageSell(t *testing.T) {
 	}
 
 	rhClientMocker.AssertExpectations(t)
+}
+
+// test error reporting for invalid sell percentage
+func TestLimitSellWithNegativePercentage(t *testing.T) {
+	tickers := []string{"QQQ"}
+	setupMocker(tickers)
+	setupAdditionalMockerValues(tickers)
+
+	limitSellCommand.PercentSell = -100
+
+	err := limitSellCommand.Validate()
+
+	expectedErr := errors.New("sell percent should be greater 0 and no greater than 100.0")
+	if assert.Error(t, err, "an error was expected") {
+		assert.Equal(t, err, expectedErr)
+	}
 }

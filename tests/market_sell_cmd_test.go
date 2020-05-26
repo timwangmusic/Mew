@@ -51,7 +51,7 @@ func TestMarketSellCommand(t *testing.T) {
 // test percentage market sell
 // valid case
 func TestMarketPercentageSell(t *testing.T) {
-	marketSellCommand.SellPercent = 50.0
+	marketSellCommand.PercentSell = 50.0
 	tickers := []string{"QQQ"}
 	setupMocker(tickers)
 	setupAdditionalMockerValues(tickers)

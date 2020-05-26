@@ -69,9 +69,38 @@ func ParseTicker(ticker string) ([]string, error) {
 	return tickers, nil
 }
 
+// process all command inputs
+// the input to this method should capture all the useful flags to the basic commands
+func ProcessInputs(ticker string, amountLimit float64, PercentSell float64, PercentLimit float64, client clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
+	Ins, Opts, err = PrepareInsAndOpts(ticker, amountLimit, PercentLimit, client)
+	if err != nil {
+		return
+	}
+
+	if PercentSell > 0 {
+		getPositionsCmd, getPositionsCmdErr := GetPositions(client)
+		if getPositionsCmdErr != nil {
+			err = getPositionsCmdErr
+			return
+		}
+
+		if _, exist := getPositionsCmd.PositionsMap[ticker]; !exist {
+			err = fmt.Errorf("not holding any security for the specified ticker: %s", ticker)
+			return
+		}
+		currentPosition := getPositionsCmd.PositionsMap[ticker]
+		// at least sell 1 share in percentage sell mode
+		Opts.Quantity = uint64(math.Max(PercentSell * currentPosition.Quantity / 100, 1.0))
+		log.Infof("processing %.2f percent of current holding of %s with a total of %d shares, which is %d shares",
+			PercentSell, ticker, uint64(currentPosition.Quantity), Opts.Quantity)
+	}
+
+	return
+}
+
 // make http calls to RH to get instrument data and current security pricing
 // generate order options
-func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64, SellPercent float64, rhClient clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
+func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64, rhClient clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
 	Ins, insErr := rhClient.GetInstrument(ticker)
 	if err = insErr; err != nil {
 		return
@@ -88,33 +117,18 @@ func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64,
 	price := quotes[0].Price()
 	log.Infof("Quote price is %f", price)
 
-	price, roundErr := utils.Round(price*PercentLimit/100.0, 0.01) // limit to floating point 2 digits
+	updatedPrice, roundErr := utils.Round(price*PercentLimit/100.0, 0.01) // limit to floating point 2 digits
 	if err = roundErr; err != nil {
 		return
 	}
 
-	log.Infof("Updated price is %f", price)
+	log.Infof("Updated price is %f", updatedPrice)
 
-	quantity := uint64(AmountLimit / price)
-	if SellPercent > 0 {
-		getPositionsCmd, getPositionsCmdErr := GetPositions(rhClient)
-		if getPositionsCmdErr != nil {
-			err = getPositionsCmdErr
-			return
-		}
-
-		if _, exist := getPositionsCmd.PositionsMap[ticker]; !exist {
-			err = fmt.Errorf("not holding any security for the specified ticker: %s", ticker)
-			return
-		}
-		currentPosition := getPositionsCmd.PositionsMap[ticker]
-		// at least sell 1 share in percentage sell mode
-		quantity = uint64(math.Max(SellPercent * currentPosition.Quantity / 100, 1.0))
-	}
+	quantity := uint64(AmountLimit / updatedPrice)
 
 	Opts = robinhood.OrderOpts{
 		Quantity:      quantity,
-		Price:         price,
+		Price:         updatedPrice,
 		ExtendedHours: true,          // default to allow after hour
 		TimeInForce:   robinhood.GFD, // default to GoodForDay
 	}

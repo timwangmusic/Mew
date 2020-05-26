@@ -50,7 +50,7 @@ func (base *LimitBuyCommand) Prepare() error {
 		return err
 	}
 
-	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, base.PercentLimit, 0, base.RhClient)
+	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, base.PercentLimit, base.RhClient)
 	if err != nil {
 		return err
 	}
