@@ -13,7 +13,7 @@ func TestRoundFunction(t *testing.T) {
 	expectedOneDigit := 100.6
 
 	// demonstrate that the previous method has deficiency
-	assert.NotEqual(t, expectedOneDigit, math.Round(price*0.1)/0.1)
+	assert.NotEqual(t, expectedOneDigit, math.Round(price/0.1)*0.1)
 
 	// test keeping one decimal digit after dot
 	rounded, _ := utils.Round(price, 0.1)
