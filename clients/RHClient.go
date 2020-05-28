@@ -7,12 +7,14 @@ import (
 
 type Client interface {
 	GetQuote(ticker string) ([]robinhood.Quote, error)
+
 	GetInstrument(ticker string) (*robinhood.Instrument, error)
 
-	// We should rename to Order() to align to internal robinhood calls
 	Order(*robinhood.Instrument, robinhood.OrderOpts) (*robinhood.OrderOutput, error)
 
 	GetPositions() ([]robinhood.Position, error)
+
+	GetInstrumentByURL(string) (*robinhood.Instrument, error)
 }
 
 type RHClient struct {
@@ -41,5 +43,10 @@ func (c *RHClient) Order(ins *robinhood.Instrument, opts robinhood.OrderOpts) (o
 
 func (c *RHClient) GetPositions() (positions []robinhood.Position, err error) {
 	positions, err = c.Client.GetPositions()
+	return
+}
+
+func (c *RHClient) GetInstrumentByURL(url string) (ins *robinhood.Instrument, err error) {
+	ins, err = c.Client.GetInstrument(url)
 	return
 }

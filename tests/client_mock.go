@@ -25,8 +25,13 @@ func (c *RHClientMock) Order(ins *robinhood.Instrument, opts robinhood.OrderOpts
 }
 
 func (c *RHClientMock) GetPositions() (positions []robinhood.Position, err error) {
-	// TODO
-	return
+	args := c.Called()
+	return args.Get(0).([]robinhood.Position), args.Error(1)
+}
+
+func (c *RHClientMock) GetInstrumentByURL(url string) (ins *robinhood.Instrument, err error) {
+	args := c.Called(url)
+	return args.Get(0).(*robinhood.Instrument), args.Error(1)
 }
 
 var rhClientMocker = new(RHClientMock)

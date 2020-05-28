@@ -3,6 +3,7 @@ package commands
 import (
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"regexp"
 	"strings"
@@ -68,6 +69,41 @@ func ParseTicker(ticker string) ([]string, error) {
 	return tickers, nil
 }
 
+// process all inputs for sell commands
+// the input to this method should capture all the useful flags to the basic sell commands
+//
+// Params
+// ticker: symbol of the security
+// amountLimit: maximum value of the security for sell. This value and the order price jointly determine number of shares
+// percentLimit: price percentage to apply for limit orders
+// percentSell: percentage of the current holdings of the security to sell
+func ProcessInputsForSell(ticker string, amountLimit float64, percentSell float64, percentLimit float64, client clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
+	Ins, Opts, err = PrepareInsAndOpts(ticker, amountLimit, percentLimit, client)
+	if err != nil {
+		return
+	}
+
+	if percentSell > 0 {
+		getPositionsCmd, getPositionsCmdErr := GetPositions(client)
+		if getPositionsCmdErr != nil {
+			err = getPositionsCmdErr
+			return
+		}
+
+		if _, exist := getPositionsCmd.PositionsMap[ticker]; !exist {
+			err = fmt.Errorf("not holding any security for the specified ticker: %s", ticker)
+			return
+		}
+		currentPosition := getPositionsCmd.PositionsMap[ticker]
+		// at least sell 1 share in percentage sell mode
+		Opts.Quantity = uint64(math.Max(percentSell*currentPosition.Quantity/100, 1.0))
+		log.Infof("processing %.2f percent of current holding of %s with a total of %d shares, which is %d shares",
+			percentSell, ticker, uint64(currentPosition.Quantity), Opts.Quantity)
+	}
+
+	return
+}
+
 // make http calls to RH to get instrument data and current security pricing
 // generate order options
 func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64, rhClient clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
@@ -87,17 +123,18 @@ func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64,
 	price := quotes[0].Price()
 	log.Infof("Quote price is %f", price)
 
-	price, roundErr := utils.Round(price*PercentLimit/100.0, 0.01) // limit to floating point 2 digits
+	updatedPrice, roundErr := utils.Round(price*PercentLimit/100.0, 0.01) // limit to floating point 2 digits
 	if err = roundErr; err != nil {
 		return
 	}
 
-	log.Infof("Updated price is %f", price)
+	log.Infof("Updated price is %f", updatedPrice)
 
-	quantity := uint64(AmountLimit / price)
+	quantity := uint64(AmountLimit / updatedPrice)
+
 	Opts = robinhood.OrderOpts{
 		Quantity:      quantity,
-		Price:         price,
+		Price:         updatedPrice,
 		ExtendedHours: true,          // default to allow after hour
 		TimeInForce:   robinhood.GFD, // default to GoodForDay
 	}

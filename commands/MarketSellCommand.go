@@ -18,6 +18,7 @@ type MarketSellCommand struct {
 	RhClient    clients.Client
 	AmountLimit float64
 	Ticker      string
+	PercentSell float64
 	//
 	Ins  *robinhood.Instrument
 	Opts robinhood.OrderOpts
@@ -36,6 +37,10 @@ func (base MarketSellCommand) Validate() error {
 	if len(base.Ticker) == 0 || len(strings.TrimSpace(base.Ticker)) == 0 {
 		return errors.New("ticker cannot be empty")
 	}
+
+	if base.PercentSell < 0 || base.PercentSell > 100.0 {
+		return errors.New("sell percent should be greater 0 and no greater than 100.0")
+	}
 	return nil
 }
 
@@ -48,7 +53,7 @@ func (base *MarketSellCommand) Prepare() error {
 		return err
 	}
 
-	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, 100.0, base.RhClient)
+	base.Ins, base.Opts, err = ProcessInputsForSell(base.Ticker, base.AmountLimit, base.PercentSell, 100.0, base.RhClient)
 	if err != nil {
 		return err
 	}
@@ -82,6 +87,7 @@ func MarketSellCallback(ctx *cli.Context) (err error) {
 			RhClient:    rhClient,
 			Ticker:      ticker,
 			AmountLimit: totalValue,
+			PercentSell: percent,
 		}
 		// preview
 		if err = msCmd.Prepare(); err != nil {

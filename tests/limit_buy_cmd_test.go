@@ -15,20 +15,6 @@ var limitBuyCommand = commands.LimitBuyCommand{
 	Ticker:       "QQQ",
 }
 
-func setupMocker(tickers []string) {
-	lastPrice := 100.0
-	quotes := []robinhood.Quote{{
-		LastTradePrice:              lastPrice,
-		LastExtendedHoursTradePrice: lastPrice,
-	}}
-	for _, ticker := range tickers {
-		rhClientMocker.On("GetQuote", ticker).Return(quotes, nil)
-	}
-
-	ins := &robinhood.Instrument{}
-	rhClientMocker.On("GetInstrument", mock.AnythingOfType("string")).Return(ins, nil)
-}
-
 // test limit buy max $1000 worth of stock with limit of 99%
 // mock current price at 100.0
 // valid case
