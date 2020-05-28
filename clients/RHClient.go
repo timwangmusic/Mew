@@ -7,9 +7,9 @@ import (
 
 type Client interface {
 	GetQuote(ticker string) ([]robinhood.Quote, error)
+
 	GetInstrument(ticker string) (*robinhood.Instrument, error)
 
-	// We should rename to Order() to align to internal robinhood calls
 	Order(*robinhood.Instrument, robinhood.OrderOpts) (*robinhood.OrderOutput, error)
 
 	GetPositions() ([]robinhood.Position, error)

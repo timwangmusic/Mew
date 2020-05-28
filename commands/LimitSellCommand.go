@@ -57,7 +57,7 @@ func (base *LimitSellCommand) Prepare() error {
 		return err
 	}
 
-	base.Ins, base.Opts, err = ProcessInputs(base.Ticker, base.AmountLimit, base.PercentSell, base.PercentLimit, base.RhClient)
+	base.Ins, base.Opts, err = ProcessInputsForSell(base.Ticker, base.AmountLimit, base.PercentSell, base.PercentLimit, base.RhClient)
 	if err != nil {
 		return err
 	}

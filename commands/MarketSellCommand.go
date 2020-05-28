@@ -53,7 +53,7 @@ func (base *MarketSellCommand) Prepare() error {
 		return err
 	}
 
-	base.Ins, base.Opts, err = ProcessInputs(base.Ticker, base.AmountLimit, base.PercentSell, 100.0, base.RhClient)
+	base.Ins, base.Opts, err = ProcessInputsForSell(base.Ticker, base.AmountLimit, base.PercentSell, 100.0, base.RhClient)
 	if err != nil {
 		return err
 	}

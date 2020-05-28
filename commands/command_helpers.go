@@ -69,15 +69,21 @@ func ParseTicker(ticker string) ([]string, error) {
 	return tickers, nil
 }
 
-// process all command inputs
-// the input to this method should capture all the useful flags to the basic commands
-func ProcessInputs(ticker string, amountLimit float64, PercentSell float64, PercentLimit float64, client clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
-	Ins, Opts, err = PrepareInsAndOpts(ticker, amountLimit, PercentLimit, client)
+// process all inputs for sell commands
+// the input to this method should capture all the useful flags to the basic sell commands
+//
+// Params
+// ticker: symbol of the security
+// amountLimit: maximum value of the security for sell. This value and the order price jointly determine number of shares
+// percentLimit: price percentage to apply for limit orders
+// percentSell: percentage of the current holdings of the security to sell
+func ProcessInputsForSell(ticker string, amountLimit float64, percentSell float64, percentLimit float64, client clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
+	Ins, Opts, err = PrepareInsAndOpts(ticker, amountLimit, percentLimit, client)
 	if err != nil {
 		return
 	}
 
-	if PercentSell > 0 {
+	if percentSell > 0 {
 		getPositionsCmd, getPositionsCmdErr := GetPositions(client)
 		if getPositionsCmdErr != nil {
 			err = getPositionsCmdErr
@@ -90,9 +96,9 @@ func ProcessInputs(ticker string, amountLimit float64, PercentSell float64, Perc
 		}
 		currentPosition := getPositionsCmd.PositionsMap[ticker]
 		// at least sell 1 share in percentage sell mode
-		Opts.Quantity = uint64(math.Max(PercentSell * currentPosition.Quantity / 100, 1.0))
+		Opts.Quantity = uint64(math.Max(percentSell*currentPosition.Quantity/100, 1.0))
 		log.Infof("processing %.2f percent of current holding of %s with a total of %d shares, which is %d shares",
-			PercentSell, ticker, uint64(currentPosition.Quantity), Opts.Quantity)
+			percentSell, ticker, uint64(currentPosition.Quantity), Opts.Quantity)
 	}
 
 	return

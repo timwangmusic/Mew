@@ -10,7 +10,7 @@ import (
 )
 
 type GetPositionsCommand struct {
-	RhClient  clients.Client
+	RhClient     clients.Client
 	PositionsMap map[string]Position
 }
 
@@ -37,8 +37,8 @@ func (cmd *GetPositionsCommand) Execute() error {
 	wg := sync.WaitGroup{}
 	wg.Add(len(rawPositions))
 	// concurrently get details for each position
-	for idx, p := range rawPositions {
-		go getPosition(&wg, positions, idx, p, cmd.RhClient)
+	for idx, position := range rawPositions {
+		go getPosition(&wg, positions, idx, position, cmd.RhClient)
 	}
 	wg.Wait()
 
@@ -73,7 +73,6 @@ func getPosition(wg *sync.WaitGroup, positions []Position, idx int, position rob
 	}
 
 	newPosition.QuotePrice = quotes[0].Price()
-	newPosition.Valid = true
 	positions[idx] = newPosition
 	return
 }
