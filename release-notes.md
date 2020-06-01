@@ -1,5 +1,11 @@
 # Mew Release Notes
 
+## [v0.1.3.1]
+2020-05-31
+
+* Support GetPositions
+* Percentage-based mkt/limit sell
+
 ## [v0.1.2]
 2020-05-14
 
