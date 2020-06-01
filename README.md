@@ -96,6 +96,23 @@ Order type: Limit Sell  Security: QQQ   Quantity: 1     price: 226.08 [y/n]y
 time="2020-05-17T00:45:34-07:00" level=info msg="About to place Limit Sell for 1 shares of QQQ at $226.08"
 time="2020-05-17T00:45:34-07:00" level=info msg="Order placed for QQQ ID f9d279ed-146e-4a5e-868b-e90272158461"
 ```
+#### Limit with Percent
+```
+D:\Projects\Mew>mew ls -ls 101 -ps 50 -t SPHD
+time="2020-05-31T18:44:14-07:00" level=info msg="welcome to use the Mew stock assistant"
+time="2020-05-31T18:44:14-07:00" level=info msg="Creating rhClient..."
+time="2020-05-31T18:44:14-07:00" level=info msg="Loading config..."
+time="2020-05-31T18:44:15-07:00" level=info msg="Quote price is 0.000000"
+time="2020-05-31T18:44:15-07:00" level=info msg="Updated price is 0.000000"
+time="2020-05-31T18:44:15-07:00" level=error msg="Error returned from API: missing_instruments: [\"LNKD\"]"
+time="2020-05-31T18:44:15-07:00" level=error msg="Error returned from API: inactive_instruments: [\"SYMC\"]"
+time="2020-05-31T18:44:15-07:00" level=error msg="Error returned from API: missing_instruments: [\"ZU\"]"
+time="2020-05-31T18:44:15-07:00" level=error msg="Error returned from API: inactive_instruments: [\"PNRA\"]"
+time="2020-05-31T18:44:15-07:00" level=error msg="Error returned from API: inactive_instruments: [\"XIV\"]"
+time="2020-05-31T18:44:15-07:00" level=info msg="processing 50.00 percent of current holding of SPHD with a total of 63 shares, which is 31 shares"
+Please confirm the order details.
+Order type: Limit Sell  Security: SPHD  Quantity: 31    price: 0.00 [y/n]
+```
 #### Batch
 ```
 Y:\Projects\Mew>mew ls -t @QQQ_MSFT -v 300 -ls 101.5
@@ -111,4 +128,21 @@ Order type: Limit Sell  Security: MSFT  Quantity: 1     price: 185.19 [y/n]y
 time="2020-05-17T00:47:20-07:00" level=info msg="About to place Limit Sell for 1 shares of MSFT at $185.19"
 time="2020-05-17T00:47:20-07:00" level=error msg="Execute() for MSFT error : Error returned from API: detail: \"Not enough shares to sell.\""
 time="2020-05-17T00:47:20-07:00" level=fatal msg="Error returned from API: detail: \"Not enough shares to sell.\""
+```
+#### Batch with Percent
+```
+D:\Projects\Mew>mew ls -ls 101 -ps 50 -t @JETS_SPHD
+time="2020-05-31T18:45:12-07:00" level=info msg="welcome to use the Mew stock assistant"
+time="2020-05-31T18:45:12-07:00" level=info msg="Creating rhClient..."
+time="2020-05-31T18:45:12-07:00" level=info msg="Loading config..."
+time="2020-05-31T18:45:13-07:00" level=info msg="Quote price is 15.340000"
+time="2020-05-31T18:45:13-07:00" level=info msg="Updated price is 15.490000"
+time="2020-05-31T18:45:14-07:00" level=error msg="Error returned from API: inactive_instruments: [\"SYMC\"]"
+time="2020-05-31T18:45:14-07:00" level=error msg="Error returned from API: missing_instruments: [\"LNKD\"]"
+time="2020-05-31T18:45:14-07:00" level=error msg="Error returned from API: missing_instruments: [\"ZU\"]"
+time="2020-05-31T18:45:14-07:00" level=error msg="Error returned from API: inactive_instruments: [\"XIV\"]"
+time="2020-05-31T18:45:14-07:00" level=error msg="Error returned from API: inactive_instruments: [\"PNRA\"]"
+time="2020-05-31T18:45:14-07:00" level=info msg="processing 50.00 percent of current holding of JETS with a total of 227 shares, which is 113 shares"
+Please confirm the order details.
+Order type: Limit Sell  Security: JETS  Quantity: 113   price: 15.49 [y/n]
 ```
