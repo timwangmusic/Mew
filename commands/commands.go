@@ -13,6 +13,7 @@ var MarketSellCmd cli.Command
 var LimitBuyCmd cli.Command
 var LimitSellCmd cli.Command
 var AuthCmd cli.Command
+var TrailingStopBuyCmd cli.Command
 
 var BufferReader *bufio.Reader
 
@@ -28,6 +29,18 @@ func InitCommands() {
 			&mfaFlag,
 		},
 		Action: AuthCallback,
+	}
+
+	TrailingStopBuyCmd = cli.Command{
+		Name: "trailing_stop_buy",
+		Aliases: []string{"tsb"},
+		Usage:   "-t MSFT -pt 10 -v 2000",
+		Flags: []cli.Flag{
+			&tickerFlag,
+			&percentTrailingFlag,
+			&totalValueFlag,
+		},
+		Action: TrailingStopBuyCommandCallback,
 	}
 
 	LimitBuyCmd = cli.Command{

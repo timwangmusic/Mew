@@ -15,7 +15,9 @@ import (
 )
 
 const (
-	TickerSeparator = "_"
+	TickerSeparator        = "_"
+	TriggerTypeStop        = "stop"
+	TrailingTypePercentage = "percentage"
 )
 
 // generate order summary for user to confirm

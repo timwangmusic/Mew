@@ -33,6 +33,7 @@ func main() {
 		&commands.LimitBuyCmd,
 		&commands.LimitSellCmd,
 		&commands.AuthCmd, // Create Auth file
+		&commands.TrailingStopBuyCmd,
 	}
 
 	appRunErr := app.Run(os.Args)
