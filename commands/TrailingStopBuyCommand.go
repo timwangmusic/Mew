@@ -48,21 +48,9 @@ func (cmd *TrailingStopBuyCommand) Prepare() error {
 	}
 
 	cmd.Opts.Side = robinhood.Buy
-	cmd.Opts.Type = robinhood.Market
-
-	// price-related settings
-	cmd.Opts.Trigger = TriggerTypeStop
-	cmd.Opts.TrailingPeg = robinhood.TrailingPeg{
-		Type:       TrailingTypePercentage,
-		Percentage: cmd.PercentTrailing,
+	if err = TrailingStopOrderHelper(&cmd.Opts, cmd.PercentTrailing, cmd.AmountLimit); err != nil {
+		return err
 	}
-	cmd.Opts.StopPrice, _ = utils.Round(cmd.Opts.Price*float64(100+cmd.PercentTrailing)/100.0, 0.01)
-	cmd.Opts.Quantity = uint64(cmd.AmountLimit / cmd.Opts.StopPrice)
-	log.Infof("updated quantity with stop price of %.2f is %d shares", cmd.Opts.StopPrice, cmd.Opts.Quantity)
-
-	// time-related settings
-	cmd.Opts.ExtendedHours = false
-	cmd.Opts.TimeInForce = robinhood.GTC // good till cancelled
 
 	err = previewHelper(ticker, cmd.Opts.Type, cmd.Opts.Side, cmd.Opts.Quantity, cmd.Opts.Price)
 	return err
@@ -100,4 +88,38 @@ func TrailingStopBuyCommandCallback(*cli.Context) (err error) {
 		}
 	}
 	return
+}
+
+func TrailingStopOrderHelper(opts *robinhood.OrderOpts, percentTrailing int, amountLimit float64) error {
+	if val := reflect.ValueOf(opts); val.IsNil() {
+		return errors.New("invalid order options")
+	}
+
+	opts.Type = robinhood.Market
+
+	// time-related settings
+	opts.ExtendedHours = false
+	opts.TimeInForce = robinhood.GTC // good till cancelled
+
+	// price-related settings
+	opts.Trigger = TriggerTypeStop
+	opts.TrailingPeg = robinhood.TrailingPeg{
+		Type:       TrailingTypePercentage,
+		Percentage: percentTrailing,
+	}
+
+	if opts.Side == robinhood.Buy {
+		opts.StopPrice, _ = utils.Round(opts.Price * float64(100+percentTrailing) / 100, 0.01)
+		opts.Quantity = uint64(amountLimit / opts.StopPrice)
+		log.Infof("preparing trailing stop buy order of %d shares with stop price %.2f",
+			opts.Quantity, opts.StopPrice)
+	} else if opts.Side == robinhood.Sell {
+		opts.StopPrice, _ = utils.Round(opts.Price * float64(100-percentTrailing) / 100, 0.01)
+		opts.Quantity = uint64(amountLimit / opts.StopPrice)
+		log.Infof("preparing trailing stop sell order of %d shares with stop price %.2f",
+			opts.Quantity, opts.StopPrice)
+	}
+
+	opts.Price = opts.StopPrice
+	return nil
 }
