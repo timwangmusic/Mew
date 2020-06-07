@@ -6,7 +6,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/weihesdlegend/Mew/clients"
-	"github.com/weihesdlegend/Mew/utils"
 	"reflect"
 )
 
@@ -55,7 +54,7 @@ func (cmd *TrailingStopSellCommand) Prepare() error {
 		return err
 	}
 
-	err = previewHelper(ticker, cmd.Opts.Type, cmd.Opts.Side, cmd.Opts.Quantity, cmd.Opts.StopPrice)
+	err = trailingStopOrderPreviewHelper(ticker, cmd.Opts.Side, cmd.Opts.Quantity, price, cmd.Opts.StopPrice)
 	return err
 }
 
@@ -82,8 +81,6 @@ func TrailingStopSellCommandCallback(*cli.Context) (err error) {
 			log.Error(err)
 			continue
 		}
-
-		log.Info(utils.OrderToString(trailingStopSellCmd.Opts, *trailingStopSellCmd.Ins, trailingStopSellCmd.Opts.StopPrice))
 
 		err = trailingStopSellCmd.Execute()
 		if err != nil {

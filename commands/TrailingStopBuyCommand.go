@@ -53,7 +53,7 @@ func (cmd *TrailingStopBuyCommand) Prepare() error {
 		return err
 	}
 
-	err = previewHelper(ticker, cmd.Opts.Type, cmd.Opts.Side, cmd.Opts.Quantity, cmd.Opts.StopPrice)
+	err = trailingStopOrderPreviewHelper(cmd.Ticker, cmd.Opts.Side, cmd.Opts.Quantity, price, cmd.Opts.StopPrice)
 	return err
 }
 
@@ -80,7 +80,6 @@ func TrailingStopBuyCommandCallback(*cli.Context) (err error) {
 			log.Error(err)
 			continue
 		}
-		log.Info(utils.OrderToString(trailingStopBuyCmd.Opts, *trailingStopBuyCmd.Ins, trailingStopBuyCmd.Opts.StopPrice))
 
 		err = trailingStopBuyCmd.Execute()
 		if err != nil {
@@ -112,13 +111,13 @@ func TrailingStopOrderHelper(price float64, opts *robinhood.OrderOpts, percentTr
 	if opts.Side == robinhood.Buy {
 		opts.StopPrice, _ = utils.Round(price * float64(100+percentTrailing) / 100, 0.01)
 		opts.Quantity = uint64(amountLimit / opts.StopPrice)
-		log.Infof("preparing trailing stop buy order of %d shares with stop price %.2f",
+		log.Infof("Preparing trailing stop buy order of %d shares with stop price %.2f",
 			opts.Quantity, opts.StopPrice)
-		opts.Price = opts.StopPrice
+		opts.Price = opts.StopPrice  // this is needed for RH API to execute as trailing stop buy order
 	} else if opts.Side == robinhood.Sell {
 		opts.StopPrice, _ = utils.Round(price * float64(100-percentTrailing) / 100, 0.01)
 		opts.Quantity = uint64(amountLimit / opts.StopPrice)
-		log.Infof("preparing trailing stop sell order of %d shares with stop price %.2f",
+		log.Infof("Preparing trailing stop sell order of %d shares with stop price %.2f",
 			opts.Quantity, opts.StopPrice)
 	}
 

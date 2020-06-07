@@ -20,6 +20,32 @@ const (
 	TrailingTypePercentage = "percentage"
 )
 
+func trailingStopOrderPreviewHelper(ticker string, side robinhood.OrderSide, quantity uint64, price float64, stopPrice float64) error {
+	// to simplify testing
+	if reflect.ValueOf(BufferReader).IsNil() {
+		return nil
+	}
+
+	fmt.Printf("Please confirm the order details.\n"+
+		"Order type: %s %s\t"+
+		"Security: %s\t"+
+		"Quantity: %d\t"+
+		"Market price: %.2f\t"+
+		"Stop price: %.2f [y/n]:",
+		"Trailing Stop", side, ticker, quantity, price, stopPrice)
+
+	// wait for user confirmation
+	for {
+		text, _ := BufferReader.ReadString('\n')
+		if strings.Contains(text, "y") {
+			break
+		} else {
+			return errors.New("order is cancelled")
+		}
+	}
+	return nil
+}
+
 // generate order summary for user to confirm
 func previewHelper(ticker string, transactionType robinhood.OrderType, side robinhood.OrderSide, quantity uint64, price float64) (err error) {
 	// to simplify testing
