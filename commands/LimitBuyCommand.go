@@ -97,7 +97,7 @@ func LimitBuyCallback(ctx *cli.Context) (err error) {
 			log.Error(err)
 			continue
 		}
-		log.Info(utils.OrderToString(lbCmd.Opts, *lbCmd.Ins, lbCmd.Opts.Price))
+		log.Info(utils.OrderToString(lbCmd.Opts, *lbCmd.Ins))
 
 		// execution
 		err = lbCmd.Execute()

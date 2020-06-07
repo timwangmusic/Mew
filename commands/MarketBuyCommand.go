@@ -88,7 +88,7 @@ func MarketBuyCallback(ctx *cli.Context) (err error) {
 			log.Error(err)
 			continue
 		}
-		log.Info(utils.OrderToString(mbCmd.Opts, *mbCmd.Ins, mbCmd.Opts.Price))
+		log.Info(utils.OrderToString(mbCmd.Opts, *mbCmd.Ins))
 
 		// execution
 		err = mbCmd.Execute()
