@@ -94,7 +94,7 @@ func MarketSellCallback(ctx *cli.Context) (err error) {
 			continue
 		}
 
-		log.Info(utils.OrderToString(msCmd.Opts, *msCmd.Ins))
+		log.Info(utils.OrderToString(msCmd.Opts, *msCmd.Ins, msCmd.Opts.Price))
 
 		if err = msCmd.Execute(); err != nil {
 			log.Error("Execute() for ", ticker, " error : ", err)

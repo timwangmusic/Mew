@@ -42,17 +42,18 @@ func (cmd *TrailingStopBuyCommand) Prepare() error {
 		return err
 	}
 
-	cmd.Ins, cmd.Opts, err = PrepareInsAndOpts(cmd.Ticker, cmd.AmountLimit, 100.0, cmd.Client)
+	var price float64
+	cmd.Ins, cmd.Opts, price, err = PrepareInsAndOpts(cmd.Ticker, cmd.AmountLimit, 100.0, cmd.Client)
 	if err != nil {
 		return err
 	}
 
 	cmd.Opts.Side = robinhood.Buy
-	if err = TrailingStopOrderHelper(&cmd.Opts, cmd.PercentTrailing, cmd.AmountLimit); err != nil {
+	if err = TrailingStopOrderHelper(price, &cmd.Opts, cmd.PercentTrailing, cmd.AmountLimit); err != nil {
 		return err
 	}
 
-	err = previewHelper(ticker, cmd.Opts.Type, cmd.Opts.Side, cmd.Opts.Quantity, cmd.Opts.Price)
+	err = previewHelper(ticker, cmd.Opts.Type, cmd.Opts.Side, cmd.Opts.Quantity, cmd.Opts.StopPrice)
 	return err
 }
 
@@ -79,7 +80,7 @@ func TrailingStopBuyCommandCallback(*cli.Context) (err error) {
 			log.Error(err)
 			continue
 		}
-		log.Info(utils.OrderToString(trailingStopBuyCmd.Opts, *trailingStopBuyCmd.Ins))
+		log.Info(utils.OrderToString(trailingStopBuyCmd.Opts, *trailingStopBuyCmd.Ins, trailingStopBuyCmd.Opts.StopPrice))
 
 		err = trailingStopBuyCmd.Execute()
 		if err != nil {
@@ -90,7 +91,7 @@ func TrailingStopBuyCommandCallback(*cli.Context) (err error) {
 	return
 }
 
-func TrailingStopOrderHelper(opts *robinhood.OrderOpts, percentTrailing int, amountLimit float64) error {
+func TrailingStopOrderHelper(price float64, opts *robinhood.OrderOpts, percentTrailing int, amountLimit float64) error {
 	if val := reflect.ValueOf(opts); val.IsNil() {
 		return errors.New("invalid order options")
 	}
@@ -109,17 +110,17 @@ func TrailingStopOrderHelper(opts *robinhood.OrderOpts, percentTrailing int, amo
 	}
 
 	if opts.Side == robinhood.Buy {
-		opts.StopPrice, _ = utils.Round(opts.Price * float64(100+percentTrailing) / 100, 0.01)
+		opts.StopPrice, _ = utils.Round(price * float64(100+percentTrailing) / 100, 0.01)
 		opts.Quantity = uint64(amountLimit / opts.StopPrice)
 		log.Infof("preparing trailing stop buy order of %d shares with stop price %.2f",
 			opts.Quantity, opts.StopPrice)
+		opts.Price = opts.StopPrice
 	} else if opts.Side == robinhood.Sell {
-		opts.StopPrice, _ = utils.Round(opts.Price * float64(100-percentTrailing) / 100, 0.01)
+		opts.StopPrice, _ = utils.Round(price * float64(100-percentTrailing) / 100, 0.01)
 		opts.Quantity = uint64(amountLimit / opts.StopPrice)
 		log.Infof("preparing trailing stop sell order of %d shares with stop price %.2f",
 			opts.Quantity, opts.StopPrice)
 	}
 
-	opts.Price = opts.StopPrice
 	return nil
 }

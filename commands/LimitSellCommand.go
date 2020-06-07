@@ -2,6 +2,7 @@ package commands
 
 import (
 	"errors"
+	"github.com/weihesdlegend/Mew/utils"
 	"reflect"
 	"strings"
 
@@ -9,7 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/weihesdlegend/Mew/clients"
-	"github.com/weihesdlegend/Mew/utils"
 )
 
 // TODO comment
@@ -100,11 +100,10 @@ func LimitSellCallback(ctx *cli.Context) (err error) {
 			continue
 		}
 
-		log.Info(utils.OrderToString(lsCmd.Opts, *lsCmd.Ins))
+		log.Info(utils.OrderToString(lsCmd.Opts, *lsCmd.Ins, lsCmd.Opts.Price))
 
 		if err = lsCmd.Execute(); err != nil {
 			log.Error("Execute() for ", ticker, " error : ", err)
-
 			continue
 		}
 	}

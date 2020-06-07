@@ -2,13 +2,13 @@ package commands
 
 import (
 	"errors"
+	"github.com/weihesdlegend/Mew/utils"
 	"reflect"
 
 	"github.com/coolboy/go-robinhood"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/weihesdlegend/Mew/clients"
-	"github.com/weihesdlegend/Mew/utils"
 )
 
 // TODO comment
@@ -43,13 +43,15 @@ func (base *MarketBuyCommand) Prepare() error {
 		return err
 	}
 
-	base.Ins, base.Opts, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, 100.0, base.RhClient)
+	var price float64
+	base.Ins, base.Opts, price, err = PrepareInsAndOpts(base.Ticker, base.AmountLimit, 100.0, base.RhClient)
 	if err != nil {
 		return err
 	}
 
 	base.Opts.Side = robinhood.Buy
 	base.Opts.Type = robinhood.Market
+	base.Opts.Price = price
 
 	if err = previewHelper(base.Ticker, base.Opts.Type, base.Opts.Side, base.Opts.Quantity, base.Opts.Price); err != nil {
 		return err
@@ -86,7 +88,7 @@ func MarketBuyCallback(ctx *cli.Context) (err error) {
 			log.Error(err)
 			continue
 		}
-		log.Info(utils.OrderToString(mbCmd.Opts, *mbCmd.Ins))
+		log.Info(utils.OrderToString(mbCmd.Opts, *mbCmd.Ins, mbCmd.Opts.Price))
 
 		// execution
 		err = mbCmd.Execute()

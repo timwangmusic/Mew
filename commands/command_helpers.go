@@ -80,10 +80,13 @@ func ParseTicker(ticker string) ([]string, error) {
 // percentLimit: price percentage to apply for limit orders
 // percentSell: percentage of the current holdings of the security to sell
 func ProcessInputsForSell(ticker string, amountLimit float64, percentSell float64, percentLimit float64, client clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
-	Ins, Opts, err = PrepareInsAndOpts(ticker, amountLimit, percentLimit, client)
+	var price float64
+	Ins, Opts, price, err = PrepareInsAndOpts(ticker, amountLimit, percentLimit, client)
 	if err != nil {
 		return
 	}
+
+	Opts.Price = price
 
 	if percentSell > 0 {
 		getPositionsCmd, getPositionsCmdErr := GetPositions(client)
@@ -108,7 +111,7 @@ func ProcessInputsForSell(ticker string, amountLimit float64, percentSell float6
 
 // make http calls to RH to get instrument data and current security pricing
 // generate order options
-func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64, rhClient clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
+func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64, rhClient clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, finalPrice float64, err error) {
 	Ins, insErr := rhClient.GetInstrument(ticker)
 	if err = insErr; err != nil {
 		return
@@ -125,18 +128,17 @@ func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64,
 	price := quotes[0].Price()
 	log.Infof("Quote price is %f", price)
 
-	updatedPrice, roundErr := utils.Round(price*PercentLimit/100.0, 0.01) // limit to floating point 2 digits
+	finalPrice, roundErr := utils.Round(price*PercentLimit/100.0, 0.01) // limit to floating point 2 digits
 	if err = roundErr; err != nil {
 		return
 	}
 
-	log.Infof("Updated price is %f", updatedPrice)
+	log.Infof("Updated price is %f", finalPrice)
 
-	quantity := uint64(AmountLimit / updatedPrice)
+	quantity := uint64(AmountLimit / finalPrice)
 
 	Opts = robinhood.OrderOpts{
 		Quantity:      quantity,
-		Price:         updatedPrice,
 		ExtendedHours: true,          // default to allow after hour
 		TimeInForce:   robinhood.GFD, // default to GoodForDay
 	}
