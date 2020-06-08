@@ -21,11 +21,6 @@ const (
 )
 
 func trailingStopOrderPreviewHelper(ticker string, side robinhood.OrderSide, quantity uint64, price float64, stopPrice float64) error {
-	// to simplify testing
-	if reflect.ValueOf(BufferReader).IsNil() {
-		return nil
-	}
-
 	fmt.Printf("Please confirm the order details.\n"+
 		"Order type: %s %s\t"+
 		"Security: %s\t"+
@@ -34,25 +29,11 @@ func trailingStopOrderPreviewHelper(ticker string, side robinhood.OrderSide, qua
 		"Stop price: %.2f [y/n]:",
 		"Trailing Stop", side, ticker, quantity, price, stopPrice)
 
-	// wait for user confirmation
-	for {
-		text, _ := BufferReader.ReadString('\n')
-		if strings.Contains(text, "y") {
-			break
-		} else {
-			return errors.New("order is cancelled")
-		}
-	}
-	return nil
+	return utils.ReadUserConfirmation(BufferReader)
 }
 
 // generate order summary for user to confirm
 func previewHelper(ticker string, transactionType robinhood.OrderType, side robinhood.OrderSide, quantity uint64, price float64) (err error) {
-	// to simplify testing
-	if reflect.ValueOf(BufferReader).IsNil() {
-		return nil
-	}
-
 	fmt.Printf("Please confirm the order details.\n"+
 		"Order type: %s %s\t"+
 		"Security: %s\t"+
@@ -60,16 +41,7 @@ func previewHelper(ticker string, transactionType robinhood.OrderType, side robi
 		"price: %.2f [y/n]",
 		transactionType, side, ticker, quantity, price)
 
-	// wait for user confirmation
-	for {
-		text, _ := BufferReader.ReadString('\n')
-		if strings.Contains(text, "y") {
-			break
-		} else {
-			return errors.New("order is cancelled")
-		}
-	}
-	return nil
+	return utils.ReadUserConfirmation(BufferReader)
 }
 
 // parse raw ticker string from user input
@@ -159,7 +131,7 @@ func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64,
 		return
 	}
 
-	log.Infof("Updated price is %f", finalPrice)
+	log.Infof("The final price is %f", finalPrice)
 
 	quantity := uint64(AmountLimit / finalPrice)
 

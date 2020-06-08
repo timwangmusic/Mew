@@ -54,7 +54,7 @@ func (cmd *TrailingStopSellCommand) Prepare() error {
 		return err
 	}
 
-	err = trailingStopOrderPreviewHelper(ticker, cmd.Opts.Side, cmd.Opts.Quantity, price, cmd.Opts.StopPrice)
+	err = trailingStopOrderPreviewHelper(cmd.Ticker, cmd.Opts.Side, cmd.Opts.Quantity, price, cmd.Opts.StopPrice)
 	return err
 }
 

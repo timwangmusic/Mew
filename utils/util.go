@@ -1,9 +1,14 @@
 package utils
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"math"
+	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/coolboy/go-robinhood"
 )
@@ -22,4 +27,22 @@ func OrderToString(opts robinhood.OrderOpts, ins robinhood.Instrument) string {
 		opts.Type.String(), opts.Side.String(),
 		opts.Quantity, ins.OrderSymbol(), opts.Price)
 	return ret
+}
+
+func ReadUserConfirmation(bufferReader *bufio.Reader) error {
+	// to simplify testing
+	if reflect.ValueOf(bufferReader).IsNil() {
+		log.Debug("the buffer reader is nil")
+		return nil
+	}
+	// wait for user confirmation
+	for {
+		text, _ := bufferReader.ReadString('\n')
+		if strings.Contains(text, "y") {
+			break
+		} else {
+			return errors.New("the order is cancelled")
+		}
+	}
+	return nil
 }
