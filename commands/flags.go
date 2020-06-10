@@ -9,6 +9,7 @@ var limit float64
 var limitSell float64
 var totalValue float64
 var percent float64
+var percentTrailing int
 
 // flag destination for auth
 var user string
@@ -22,6 +23,7 @@ var limitBuyFlag cli.Float64Flag      // limit buy percentage to market price
 var limitSellFlag cli.Float64Flag     // limit sell percentage to market price
 var totalValueFlag cli.Float64Flag    // limit order maximum transaction amount
 var percentToSellFlag cli.Float64Flag // percentage of total amount to sell
+var percentTrailingFlag cli.IntFlag   // percentage to use in trailing stop orders
 
 // flags for auth
 var userFlag cli.StringFlag
@@ -96,5 +98,13 @@ func init() {
 		Required:    false,
 		Value:       0,
 		Destination: &percent,
+	}
+
+	percentTrailingFlag = cli.IntFlag{
+		Name:        "percentTrailing",
+		Aliases:     []string{"pt"},
+		Required:    false,
+		Value:       10,
+		Destination: &percentTrailing,
 	}
 }

@@ -15,16 +15,25 @@ import (
 )
 
 const (
-	TickerSeparator = "_"
+	TickerSeparator        = "_"
+	TriggerTypeStop        = "stop"
+	TrailingTypePercentage = "percentage"
 )
+
+func trailingStopOrderPreviewHelper(ticker string, side robinhood.OrderSide, quantity uint64, price float64, stopPrice float64) error {
+	fmt.Printf("Please confirm the order details.\n"+
+		"Order type: %s %s\t"+
+		"Security: %s\t"+
+		"Quantity: %d\t"+
+		"Market price: %.2f\t"+
+		"Stop price: %.2f [y/n]:",
+		"Trailing Stop", side, ticker, quantity, price, stopPrice)
+
+	return utils.ReadUserConfirmation(BufferReader)
+}
 
 // generate order summary for user to confirm
 func previewHelper(ticker string, transactionType robinhood.OrderType, side robinhood.OrderSide, quantity uint64, price float64) (err error) {
-	// to simplify testing
-	if reflect.ValueOf(BufferReader).IsNil() {
-		return nil
-	}
-
 	fmt.Printf("Please confirm the order details.\n"+
 		"Order type: %s %s\t"+
 		"Security: %s\t"+
@@ -32,16 +41,7 @@ func previewHelper(ticker string, transactionType robinhood.OrderType, side robi
 		"price: %.2f [y/n]",
 		transactionType, side, ticker, quantity, price)
 
-	// wait for user confirmation
-	for {
-		text, _ := BufferReader.ReadString('\n')
-		if strings.Contains(text, "y") {
-			break
-		} else {
-			return errors.New("order is cancelled")
-		}
-	}
-	return nil
+	return utils.ReadUserConfirmation(BufferReader)
 }
 
 // parse raw ticker string from user input
@@ -78,10 +78,13 @@ func ParseTicker(ticker string) ([]string, error) {
 // percentLimit: price percentage to apply for limit orders
 // percentSell: percentage of the current holdings of the security to sell
 func ProcessInputsForSell(ticker string, amountLimit float64, percentSell float64, percentLimit float64, client clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
-	Ins, Opts, err = PrepareInsAndOpts(ticker, amountLimit, percentLimit, client)
+	var price float64
+	Ins, Opts, price, err = PrepareInsAndOpts(ticker, amountLimit, percentLimit, client)
 	if err != nil {
 		return
 	}
+
+	Opts.Price = price
 
 	if percentSell > 0 {
 		getPositionsCmd, getPositionsCmdErr := GetPositions(client)
@@ -106,7 +109,7 @@ func ProcessInputsForSell(ticker string, amountLimit float64, percentSell float6
 
 // make http calls to RH to get instrument data and current security pricing
 // generate order options
-func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64, rhClient clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, err error) {
+func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64, rhClient clients.Client) (Ins *robinhood.Instrument, Opts robinhood.OrderOpts, finalPrice float64, err error) {
 	Ins, insErr := rhClient.GetInstrument(ticker)
 	if err = insErr; err != nil {
 		return
@@ -123,18 +126,17 @@ func PrepareInsAndOpts(ticker string, AmountLimit float64, PercentLimit float64,
 	price := quotes[0].Price()
 	log.Infof("Quote price is %f", price)
 
-	updatedPrice, roundErr := utils.Round(price*PercentLimit/100.0, 0.01) // limit to floating point 2 digits
+	finalPrice, roundErr := utils.Round(price*PercentLimit/100.0, 0.01) // limit to floating point 2 digits
 	if err = roundErr; err != nil {
 		return
 	}
 
-	log.Infof("Updated price is %f", updatedPrice)
+	log.Infof("The final price is %f", finalPrice)
 
-	quantity := uint64(AmountLimit / updatedPrice)
+	quantity := uint64(AmountLimit / finalPrice)
 
 	Opts = robinhood.OrderOpts{
 		Quantity:      quantity,
-		Price:         updatedPrice,
 		ExtendedHours: true,          // default to allow after hour
 		TimeInForce:   robinhood.GFD, // default to GoodForDay
 	}
