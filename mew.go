@@ -10,9 +10,9 @@ import (
 
 var (
 	// Version The app version
-	Version = "v0.1.3.1"
+	Version = "v0.1.4"
 	// BuildDate The app build date in yyyy-mm-dd
-	BuildDate = "2020-05-31"
+	BuildDate = "2020-06-09"
 )
 
 // example input from CLI: mew buy -s 100 -t AAPL

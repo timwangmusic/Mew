@@ -1,5 +1,10 @@
 # Mew Release Notes
 
+## [v0.1.4]
+2020-06-09
+
+* Support percent based trailing stop sell/buy
+
 ## [v0.1.3.1]
 2020-05-31
 
