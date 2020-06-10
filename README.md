@@ -54,7 +54,7 @@ Order type: Limit Buy   Security: QQQ   Quantity: 1     price: 221.63 [y/n]y
 time="2020-05-17T00:42:58-07:00" level=info msg="About to place Limit Buy for 1 shares of QQQ at $221.63"
 time="2020-05-17T00:42:58-07:00" level=info msg="Order placed with order ID 5948a01a-e491-480d-9355-bc7c1ca6a33d"
 ```
-### Batch
+#### Batch
 ```
 Y:\Projects\Mew>mew lb -t @QQQ_SPY -l 99.5 -v 300
 time="2020-05-17T00:43:33-07:00" level=info msg="welcome to use the Mew stock assistant"
@@ -72,6 +72,19 @@ Please confirm the order details.
 Order type: Limit Buy   Security: SPY   Quantity: 1     price: 284.26 [y/n]y
 time="2020-05-17T00:43:37-07:00" level=info msg="About to place Limit Buy for 1 shares of SPY at $284.26"
 time="2020-05-17T00:43:38-07:00" level=info msg="Order placed with order ID 37b4b3df-ed60-4daf-b262-ad1a5a17dbc2"
+```
+### Trailing Stop
+```
+D:\Projects\Mew>mew tsb -pt 10 -v 2000 -t QQQ
+time="2020-06-09T22:36:32-07:00" level=info msg="welcome to use the Mew stock assistant"
+time="2020-06-09T22:36:32-07:00" level=info msg="Creating rhClient..."
+time="2020-06-09T22:36:32-07:00" level=info msg="Loading config..."
+time="2020-06-09T22:36:33-07:00" level=info msg="Quote price is 243.820000"
+time="2020-06-09T22:36:33-07:00" level=info msg="The final price is 243.820000"
+time="2020-06-09T22:36:33-07:00" level=info msg="Preparing trailing stop buy order of 7 shares with stop price 268.20"
+Please confirm the order details.
+Order type: Trailing Stop Buy   Security: QQQ   Quantity: 7     Market price: 243.82    Stop price: 268.20 [y/n]:y
+time="2020-06-09T22:36:34-07:00" level=info msg="Order placed for QQQ with order ID: 69d5ea64-7fa0-4aec-b1f1
 ```
 ### Sell
 #### Market
@@ -145,4 +158,17 @@ time="2020-05-31T18:45:14-07:00" level=error msg="Error returned from API: inact
 time="2020-05-31T18:45:14-07:00" level=info msg="processing 50.00 percent of current holding of JETS with a total of 227 shares, which is 113 shares"
 Please confirm the order details.
 Order type: Limit Sell  Security: JETS  Quantity: 113   price: 15.49 [y/n]
+```
+#### Trailing Stop
+```
+D:\Projects\Mew>mew tss -pt 10 -v 2000 -t QQQ
+time="2020-06-09T22:35:05-07:00" level=info msg="welcome to use the Mew stock assistant"
+time="2020-06-09T22:35:05-07:00" level=info msg="Creating rhClient..."
+time="2020-06-09T22:35:05-07:00" level=info msg="Loading config..."
+time="2020-06-09T22:35:07-07:00" level=info msg="Quote price is 243.820000"
+time="2020-06-09T22:35:07-07:00" level=info msg="The final price is 243.820000"
+time="2020-06-09T22:35:07-07:00" level=info msg="Preparing trailing stop sell order of 9 shares with stop price 219.44"
+Please confirm the order details.
+Order type: Trailing Stop Sell  Security: QQQ   Quantity: 9     Market price: 243.82    Stop price: 219.44 [y/n]:y
+time="2020-06-09T22:35:14-07:00" level=info msg="Order placed for QQQ with order ID: 00d962dd-d98c-4aaa-bd91
 ```
